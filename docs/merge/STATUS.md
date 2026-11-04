@@ -1394,3 +1394,14 @@ failure or new A-I01 regression was found; lifecycle-policy changes require sepa
 - Not verified: the approval panel and fill marker in a browser with a logged-in wallet.
 - Open: Nov 7 market still has no prices; operator of the root wallet and remote workers unidentified;
   ticket browser fixture needs updating.
+
+### 2026-11-04 (BRAND-LOGO) — New ring logo for the favicon and README
+- Who: Claude Code, at the user's request.
+- What: the user's PNG replaces the favicon: `frontend/src/app/icon.png` supersedes `icon.svg`. The README
+  marks `docs/assets/eros-mark-on-{dark,light}.svg` keep their paths and are redrawn as transparent vectors
+  from the PNG's measured geometry and colour. The light-theme mark uses a dark centre so it stays visible.
+- Checks: `next dev`: `/icon.png` 200 and byte-identical to the source, `/icon.svg` 404, one icon link tag.
+  `xmllint --noout` on both SVGs exit 0; both rendered with `qlmanage` and inspected. Asset-only change;
+  typecheck and tests not run.
+- Open: the favicon is a 64×68 screenshot with an opaque background. `BrandImage` and
+  `frontend/public/brand/` were not changed; the brand files still show the old bar mark.
