@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/akronim26/eros-markets/main/docs/assets/eros-mark-on-dark.svg">
-    <img src="https://raw.githubusercontent.com/akronim26/eros-markets/main/docs/assets/eros-mark-on-light.svg" alt="Osyleum logo" width="104" height="104">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/eros-mark-on-dark.svg">
+    <img src="docs/assets/eros-mark-on-light.svg" alt="Osyleum logo" width="104" height="104">
   </picture>
 </p>
 
@@ -145,8 +145,8 @@ Here's what happens over one market's life, from depositing to claiming your pay
 
 ```bash
 # Clone the repository
-git clone --recursive https://github.com/akronim26/eros-markets.git
-cd eros-markets/contracts
+git clone --recursive https://github.com/xipharis/Olyseum.git
+cd Olyseum/contracts
 
 # Build, and check contract sizes against Monad's 128 KiB limit
 forge build --sizes
@@ -172,8 +172,8 @@ bash scripts/check-task.sh A010
 ### Frontend
 
 ```bash
-git clone --branch feat/pricefeed --recurse-submodules https://github.com/akronim26/eros-markets.git
-cd eros-markets
+git clone --recurse-submodules https://github.com/xipharis/Olyseum.git
+cd Olyseum
 npm ci --prefix frontend
 cp frontend/.env.example frontend/.env.local
 npm run dev --prefix frontend

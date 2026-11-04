@@ -1318,3 +1318,17 @@ failure or new A-I01 regression was found; lifecycle-policy changes require sepa
 - Open: `frontend/e2e/support/local-deployment.ts` still matches `"Eros native"`, and 194 tracked
   files still contain "Eros Markets", including on-chain listing artifacts that should stay as
   recorded.
+
+### 2026-11-04 (BRAND-OSYLEUM-2) — rename leftovers
+- Who: Claude Code, at the user's request.
+- What: `frontend/e2e/support/local-deployment.ts` now matches `"Osyleum native"`. E2E fixture
+  markets set no `source`, so behavior is unchanged. README logo now uses repo-relative paths, and
+  clone commands point at `xipharis/Olyseum` without the removed `feat/pricefeed` branch.
+- Deliberately kept: env vars, `@eros/*` packages, contract names, storage keys, rules text and
+  domains (hash-bound or on-chain), `docs/spec`, historical evidence, and `packages/risk-sdk`
+  comments (sources have recorded hashes).
+- Not included: uncommitted edits to `market-parts.tsx`, `terminal.tsx`, `ticket.tsx`,
+  `trade-intent.ts` and `protection.test.mjs`, which are other in-progress work.
+- Tests (exit 0): `frontend`: `npm run typecheck`; `npm test` 158/158. Both ran on a working tree
+  that included those uncommitted edits.
+- Not run: e2e suites; the changed line is not exercised by them because fixtures set no `source`.
