@@ -1,0 +1,471 @@
+@import "tailwindcss";
+@import "./privy.css";
+
+/*
+ * Olyseum — a quiet prediction-market theme, light by default with a matching dark mode.
+ * Borrowed from the Grass site: white ground, soft grey cards, near-black ink, one warm amber
+ * mark, DM Sans set tight. Outcomes carry the only saturated colour: green YES, red NO.
+ */
+@theme {
+  --color-ground: #ffffff; /* page ground */
+  --color-panel: #f4f4f4; /* soft grey card */
+  --color-hover: #ededed;
+  --color-press: #e4e4e4;
+  --color-ink: #0a0a0a; /* inverted (black) cards */
+  --color-ink-2: #1f1f1f;
+  --color-fg: #0a0a0a;
+  --color-fg-2: #3a3a3a;
+  --color-fg-3: #6b6b6b; /* 5.3:1 on white */
+  --color-fg-4: #8a8a8a; /* axis ticks, placeholders */
+  --color-ivory: #ffffff; /* text on ink */
+  --color-ivory-3: #a3a3a3;
+  --color-line: #ececec; /* inner rules */
+  --color-line-strong: #dedede; /* card outlines */
+  --color-dot: transparent;
+  --color-signal: #ffab00; /* Amber: brand mark, focus, live dot */
+  --color-signal-text: #a86400; /* amber text on white, 4.9:1 */
+  --color-on-signal: #0a0a0a;
+  --color-bid: #16a34a; /* green: YES / long / gains */
+  --color-ask: #e23d4b; /* red: NO / short / losses */
+  --color-action: #0a0a0a; /* primary buttons are black, as on Grass */
+  --color-action-hover: #2a2a2a;
+  --color-on-action: #ffffff;
+  --color-on-bid: #ffffff;
+  --color-on-ask: #ffffff;
+  --color-yes: #16a34a;
+  --color-no: #e23d4b;
+  --color-on-yes: #ffffff;
+  --color-on-no: #ffffff;
+
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+  --radius-box: 16px; /* cards, panels, dialogs */
+  --radius-control: 10px; /* buttons, inputs, selects */
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* Dark mode: follows the system unless the viewer picked a theme (data-theme on <html>). */
+:root { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --color-ground: #0b0b0c;
+  --color-panel: #161617;
+  --color-hover: #1f1f21;
+  --color-press: #29292b;
+  --color-ink: #f2f2f2; /* the emphasis card inverts: light on dark */
+  --color-ink-2: #e2e2e2;
+  --color-fg: #f5f5f5;
+  --color-fg-2: #cfcfcf;
+  --color-fg-3: #9a9a9a; /* 7.1:1 on ground */
+  --color-fg-4: #7a7a7a;
+  --color-ivory: #0a0a0a;
+  --color-ivory-3: #555555;
+  --color-line: #232325;
+  --color-line-strong: #313134;
+  --color-signal: #ffab00;
+  --color-signal-text: #ffbe3d;
+  --color-on-signal: #0a0a0a;
+  --color-bid: #22c55e;
+  --color-ask: #f05261;
+  --color-action: #f5f5f5;
+  --color-action-hover: #dcdcdc;
+  --color-on-action: #0a0a0a;
+  --color-on-bid: #0a0a0a;
+  --color-on-ask: #0a0a0a;
+  --color-yes: #22c55e;
+  --color-no: #f05261;
+  --color-on-yes: #0a0a0a;
+  --color-on-no: #0a0a0a;
+  color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --color-ground: #0b0b0c;
+  --color-panel: #161617;
+  --color-hover: #1f1f21;
+  --color-press: #29292b;
+  --color-ink: #f2f2f2; /* the emphasis card inverts: light on dark */
+  --color-ink-2: #e2e2e2;
+  --color-fg: #f5f5f5;
+  --color-fg-2: #cfcfcf;
+  --color-fg-3: #9a9a9a; /* 7.1:1 on ground */
+  --color-fg-4: #7a7a7a;
+  --color-ivory: #0a0a0a;
+  --color-ivory-3: #555555;
+  --color-line: #232325;
+  --color-line-strong: #313134;
+  --color-signal: #ffab00;
+  --color-signal-text: #ffbe3d;
+  --color-on-signal: #0a0a0a;
+  --color-bid: #22c55e;
+  --color-ask: #f05261;
+  --color-action: #f5f5f5;
+  --color-action-hover: #dcdcdc;
+  --color-on-action: #0a0a0a;
+  --color-on-bid: #0a0a0a;
+  --color-on-ask: #0a0a0a;
+  --color-yes: #22c55e;
+  --color-no: #f05261;
+  --color-on-yes: #0a0a0a;
+  --color-on-no: #0a0a0a;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+
+@layer base {
+  /* Boxes are rounded; controls a little less, so a control never looks rounder than its box. */
+  .frame,
+  [class~="border"] {
+    border-radius: var(--radius-box);
+  }
+  /* Clip edge-to-edge children to the corners. The top bar opts out: its wallet notice overhangs. */
+  .frame:not(.frame-open) {
+    overflow: clip;
+  }
+  /* Collapsed table borders cannot be rounded. */
+  table.frame {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  :is(button, select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"])) {
+    border-radius: var(--radius-control);
+  }
+  input:is([type="checkbox"], [type="radio"]) {
+    border-radius: var(--radius-sm);
+  }
+
+  /* Every interactive element eases between states; nothing snaps. */
+  button,
+  a,
+  summary,
+  select,
+  [role="button"],
+  [role="tab"] {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out-expo);
+  }
+  button:not(:disabled):active {
+    transform: translateY(1px);
+  }
+
+  html {
+    background: var(--color-ground);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-ground);
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-signal) 45%, transparent);
+    color: var(--color-fg);
+  }
+
+  input,
+  textarea,
+  select {
+    caret-color: var(--color-signal);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-fg);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  button:not(:disabled), summary { cursor: pointer; }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/* Raised action controls keep the same square frames and palette as the terminal. */
+.ui-button, .ui-toggle {
+  box-shadow: none;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease,
+    color 120ms ease, filter 120ms ease;
+}
+.ui-button[data-variant="ghost"] {
+  box-shadow: inset 0 0 0 1px var(--color-line), 0 1px 0 var(--color-line);
+}
+@media (hover: hover) {
+  .ui-button:not(:disabled):hover, .ui-toggle:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+}
+.ui-toggle[aria-pressed="true"], .ui-toggle[aria-checked="true"] {
+  box-shadow: inset 0 0 0 1px currentColor, 0 1px 0 var(--color-line-strong);
+}
+.ui-button:not(:disabled):active, .ui-toggle:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--color-ink) 20%, transparent);
+}
+.ui-button:disabled, .ui-button:disabled .ui-button-label, .ui-toggle:disabled {
+  background-color: var(--color-press);
+  color: var(--color-fg-4);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+.ui-button:disabled, .ui-toggle:disabled { opacity: 0.65; }
+
+@layer components {
+  .ui-button {
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  /* Sliding fill: a tint of the text colour sweeps in from the left and leaves to the right. */
+  .ui-sweep,
+  .ui-button:not(:has(.ui-button-label)) {
+    position: relative;
+    isolation: isolate;
+  }
+  .ui-sweep::before,
+  .ui-button:not(:has(.ui-button-label))::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 380ms var(--ease-out-expo);
+  }
+  :is(.ui-button, .group):not(:disabled):is(:hover, :focus-visible) .ui-sweep::before,
+  .ui-button:not(:disabled):not(:has(.ui-button-label)):is(:hover, :focus-visible)::before {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* The arrow in the Signal square slides out to the right and returns from the left. */
+  .ui-arrow {
+    overflow: hidden;
+  }
+  :is(.ui-button, .group):not(:disabled):is(:hover, :focus-visible) .ui-arrow svg,
+  tr:hover .ui-arrow svg {
+    animation: arrow-slide 480ms var(--ease-out-expo);
+  }
+
+  /* Inline arrows nudge toward where they lead. */
+  .ui-nudge {
+    transition: transform 200ms var(--ease-out-expo);
+  }
+  :is(a, button, .group):is(:hover, :focus-visible) .ui-nudge {
+    transform: translateX(3px);
+  }
+  :is(a, button, .group):is(:hover, :focus-visible) .ui-nudge-up {
+    transform: translate(2px, -2px);
+  }
+}
+
+@keyframes arrow-slide {
+  0% { transform: translateX(0); }
+  45% { transform: translateX(170%); }
+  45.01% { transform: translateX(-170%); }
+  100% { transform: translateX(0); }
+}
+
+@layer utilities {
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .hair-b {
+    box-shadow: inset 0 -1px 0 var(--color-line);
+  }
+  /* A real border, not an inset shadow: child backgrounds must never paint over the frame. */
+  .frame {
+    border: 1px solid var(--color-line-strong);
+  }
+  /* Grass eyebrow: small, tracked, upper case. */
+  .label {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.045em;
+  }
+  .eyebrow {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-fg-3);
+  }
+  .glass {
+    background: color-mix(in srgb, var(--color-ground) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(16px);
+    -webkit-backdrop-filter: saturate(1.4) blur(16px);
+  }
+}
+
+/* A changed digit flips into place (150 ms); columns never move. */
+@keyframes digit-flip {
+  from {
+    transform: translateY(-40%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.digit-new {
+  display: inline-block;
+  animation: digit-flip 150ms var(--ease-out-expo);
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee {
+  animation: marquee 40s linear infinite;
+}
+
+/* Warming-up notice: each phrase rises in; the signal square breathes while data loads. */
+@keyframes warming-phrase {
+  from {
+    transform: translateY(35%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.warming-phrase {
+  display: inline-block;
+  animation: warming-phrase 260ms var(--ease-out-expo);
+}
+/* Market board: each 24h price line draws itself once, left to right. */
+@keyframes trace-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.trace-draw {
+  animation: trace-draw 900ms var(--ease-out-expo) both;
+}
+@keyframes warming-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.warming-pulse {
+  animation: warming-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; }
+  .ui-button:not(:disabled):hover, .ui-button:not(:disabled):active,
+  .ui-toggle:not(:disabled):hover, .ui-toggle:not(:disabled):active { transform: none; }
+  .digit-new,
+  .warming-phrase,
+  .warming-pulse,
+  .trace-draw,
+  .caret::after,
+  .marquee,
+  .ui-arrow svg {
+    animation: none !important;
+  }
+  .ui-sweep::before,
+  .ui-button::before {
+    display: none;
+  }
+  button:not(:disabled):active,
+  .ui-nudge {
+    transform: none !important;
+  }
+}
+
+/* Field validation is visible beyond the action button, in either theme. */
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
+  border-color: var(--color-ask);
+  box-shadow: inset 0 0 0 1px var(--color-ask);
+}
+
+/* Docs body copy: plain HTML inside a section reads as prose. */
+.doc-prose a { color: var(--color-fg); text-decoration: underline; text-decoration-color: var(--color-line-strong); text-underline-offset: 4px; }
+.doc-prose a:hover { color: var(--color-signal-text); text-decoration-color: currentColor; }
+.doc-prose strong { color: var(--color-fg); font-weight: 600; }
+.doc-prose ul, .doc-prose ol { padding-left: 1.25rem; }
+.doc-prose ul { list-style: square; }
+.doc-prose ol { list-style: decimal; }
+.doc-prose li + li { margin-top: 0.375rem; }
+.doc-prose li::marker { color: var(--color-fg-4); }
