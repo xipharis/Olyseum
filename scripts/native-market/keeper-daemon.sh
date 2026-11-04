@@ -45,8 +45,8 @@ while true; do
   [ "${LIQUIDATE:-1}" = 0 ] || liquidation_scan
   breaker_check
   # perp.sh's tx() is loaded with eval, not `. <(...)`: bash 3.2 (macOS) sources nothing from a process substitution.
-  # Perp maker follows the native INDEX: re-quote at INDEX +/- HALF ticks when a side is empty or the
-  # perp mid is >= FOLLOW ticks away from INDEX, in one batch that cancels the maker's own orders by id.
+  # Perp maker follows the native INDEX: re-quote at INDEX +/- HALF ticks when a side is empty, a quote is
+  # down to under half of LOTS, or the perp mid is >= FOLLOW ticks away from INDEX, in one batch that cancels the maker's own orders by id.
   now=$(rd block latest -f timestamp)
   idx=$(rd call "$ENG" 'indexTwap300(uint64)((bool,int256,uint256,int256))' "$now" | tr -d '()' | awk -F', ' '$1=="true"{print $2}' | awk '{print $1}')
   read -r bid ask < <(rd call "$ENG" 'bestBidAsk()(uint16,uint16)' | tr '\n' ' ')
@@ -55,7 +55,7 @@ while true; do
   if [ -n "$idx" ] && [ -z "${idx//[0-9]/}" ]; then
     target=$(( (idx + 500000000000000) / 1000000000000000 ))
     pb=$((target - HALF)); pa=$((target + HALF))
-    if [ -n "$epoch" ] && [ "$epoch" != "$quoted_epoch" ] || [ "${bid:-0}" = 0 ] || [ "${ask:-0}" = 0 ] || [ $(( (bid + ask) / 2 - target )) -ge "$FOLLOW" ] || [ $(( target - (bid + ask) / 2 )) -ge "$FOLLOW" ]; then
+    if [ -n "$epoch" ] && [ "$epoch" != "$quoted_epoch" ] || [ "${bid:-0}" = 0 ] || [ "${ask:-0}" = 0 ] || [ $(( (bid + ask) / 2 - target )) -ge "$FOLLOW" ] || [ $(( target - (bid + ask) / 2 )) -ge "$FOLLOW" ] || quotes_thin "$LOTS"; then
       echo "$(ts) perp quotes ${bid:-?}/${ask:-?} (epoch ${epoch:-?}, quoted ${quoted_epoch:-none}) vs INDEX tick $target: re-quoting $pb/$pa x $LOTS lots"
       if requote "$pb" "$pa" "$LOTS"; then quoted_epoch=$epoch; else echo "$(ts) perp quote failed (retry next loop)"; fi
     fi

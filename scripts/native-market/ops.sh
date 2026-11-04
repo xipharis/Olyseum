@@ -8,7 +8,7 @@
 # Private config: $NATIVE_OPS_ENV (default $NATIVE_RUN/ops.env; NATIVE_RUN defaults to tmp/native-public; mode 600, never committed) with
 #   MONAD_RPC_URL, NATIVE_OBSERVER_PRIVATE_KEY, NATIVE_KEEPER_PRIVATE_KEY, NATIVE_PERP_MAKER_PRIVATE_KEY,
 #   NATIVE_DEPLOYMENT (DeployNativeMarket JSON), NATIVE_RULES (rules JSON), NATIVE_ENGINE.
-# Optional: PUBLISH_MS (60000), KEEPER_EVERY (90), MAX_RESTARTS (5), MIN_GAS_MON (0.5), LOW_GAS_MON (3),
+# Optional: PUBLISH_MS (60000), KEEPER_EVERY (90), KEEPER_LOTS (lots per perp quote; keeper-daemon.sh default), MAX_RESTARTS (5), MIN_GAS_MON (0.5), LOW_GAS_MON (3),
 #   MONAD_READ_FALLBACK_URLS (comma-separated HTTPS reads tried in order when MONAD_RPC_URL fails; writes stay on it).
 # Keys are only read from that file (never argv). Each service holds an exclusive lock (flock, or a lock
 # directory where flock is missing), so a second copy of the same service cannot start: the INDEX signer
@@ -87,7 +87,7 @@ supervise() {
   local who
   case $name in
     publisher) export NATIVE_OBSERVER_KEY="$NATIVE_OBSERVER_PRIVATE_KEY" NATIVE_RPC="$R" NATIVE_RPC_FALLBACKS="$RF"; who=$(addr "$NATIVE_OBSERVER_PRIVATE_KEY") ;;
-    keeper) export R RF ENG KEEPER_KEY="$NATIVE_KEEPER_PRIVATE_KEY" PERP_MAKER_KEY="$NATIVE_PERP_MAKER_PRIVATE_KEY" EVERY="$KEEPER_EVERY"; who=$(addr "$NATIVE_KEEPER_PRIVATE_KEY") ;;
+    keeper) export R RF ENG KEEPER_KEY="$NATIVE_KEEPER_PRIVATE_KEY" PERP_MAKER_KEY="$NATIVE_PERP_MAKER_PRIVATE_KEY" EVERY="$KEEPER_EVERY"; [ -z "${KEEPER_LOTS:-}" ] || export LOTS="$KEEPER_LOTS"; who=$(addr "$NATIVE_KEEPER_PRIVATE_KEY") ;;
   esac
   take_lock "$name" || { echo "$(ts) $name already running (lock held); not starting a second writer"; exit 3; }
   echo $$ > "$RUN/$name.supervisor.pid"

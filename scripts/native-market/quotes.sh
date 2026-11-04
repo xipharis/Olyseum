@@ -32,6 +32,17 @@ maker_live_ids() { local mid; mid=$(rd call "$ENG" 'participantId(address)(uint3
     rd logs --from-block "$from" --to-block $((from + 99 > head ? head : from + 99)) --address "$ENG" --json | _placed_ids "$mid"
   done | _live_only "$mid"; }
 
+# True when a quote from the last re-quote has been taken down to under half of <lots>, or filled away.
+# Without a state file there is nothing to judge: the keeper re-quotes on start anyway. A failed read
+# is not evidence of a thin quote, so it never triggers a re-quote.
+quotes_thin() { local lots=$1 id size
+  [ -s "$QUOTE_STATE" ] || return 1
+  while read -r id; do [ -n "$id" ] || continue
+    size=$(rd call "$ENG" "$ORDER" "$id" | tr -d '()' | sed 's/ \[[^]]*\]//g' | awk -F', ' '{print $2}') || continue
+    [ -n "$size" ] && [ $(( size * 2 )) -lt "$lots" ] && return 0
+  done < "$QUOTE_STATE"
+  return 1; }
+
 # requote <bidTick> <askTick> <lots>: one transaction; records the new order ids.
 requote() { local mid cancels out h
   mid=$(rd call "$ENG" 'participantId(address)(uint32)' "$MAKER_ADDR") || return 1

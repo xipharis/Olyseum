@@ -141,6 +141,7 @@ export function prepareNativeMarket(item, { root, manifest, ignored, privateKeyT
   if (monitorKey) claim('MONITOR', monitorKey, 'NATIVE_MONITOR_PRIVATE_KEY');
   const publishMs = Number(env.PUBLISH_MS ?? 60_000), every = Number(env.KEEPER_EVERY ?? 90);
   if (!Number.isInteger(publishMs) || publishMs < 5_000 || !Number.isInteger(every) || every < 10) throw Error('INVALID_NATIVE_CADENCE');
+  if (env.KEEPER_LOTS !== undefined && !/^[1-9]\d*$/.test(env.KEEPER_LOTS)) throw Error('INVALID_KEEPER_LOTS');
   const fallbacks = env.MONAD_READ_FALLBACK_URLS ?? '';
   return {
     secrets,
@@ -151,7 +152,7 @@ export function prepareNativeMarket(item, { root, manifest, ignored, privateKeyT
           environment: { NATIVE_OBSERVER_KEY: env.NATIVE_OBSERVER_PRIVATE_KEY, NATIVE_RPC: rpc, NATIVE_RPC_FALLBACKS: fallbacks } },
         { role: 'keeper', command: 'bash', args: ['scripts/native-market/keeper-daemon.sh'],
           environment: { R: rpc, RF: fallbacks, ENG: engine, KEEPER_KEY: env.NATIVE_KEEPER_PRIVATE_KEY,
-            PERP_MAKER_KEY: env.NATIVE_PERP_MAKER_PRIVATE_KEY, EVERY: String(every), ...(monitorKey ? { MONITOR_KEY: monitorKey } : {}) } },
+            PERP_MAKER_KEY: env.NATIVE_PERP_MAKER_PRIVATE_KEY, EVERY: String(every), ...(env.KEEPER_LOTS ? { LOTS: env.KEEPER_LOTS } : {}), ...(monitorKey ? { MONITOR_KEY: monitorKey } : {}) } },
       ] },
     runwayGroup: { name: item.name, addresses: roles, budgets: [
       // Measured on Monad testnet: ~250k gas per INDEX publish, ~750k per keeper loop (sample + upkeep).
