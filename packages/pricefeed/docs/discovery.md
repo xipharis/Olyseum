@@ -1,7 +1,7 @@
 # Read-only market discovery and metadata validation
 
 Original milestone 3 / PF009 now supplies bounded Gamma discovery and source
-metadata monitoring. Candidates never enable workers, choose the Eros YES token,
+metadata monitoring. Candidates never enable workers, choose the Osyleum YES token,
 assign scheduledT, approve a mapping or access a signer/relay.
 
 ## Run
@@ -21,7 +21,7 @@ require evidence. No source substitution or category-specific price model is use
 The command prints JSON containing original response bodies, headers, arrival
 times, SHA-256 evidence and candidates. Save that output for the mapping reviewer.
 It has no RPC, key, journal or activation option. Source values remain strings;
-source endDate is retained as evidence and never replaces the Eros deadline.
+source endDate is retained as evidence and never replaces the Osyleum deadline.
 
 ## Pinned read contract
 
@@ -58,7 +58,7 @@ unknown trading flags and unverified tag membership remain BLOCKED with reason
 codes. Negative-risk, augmented-negative-risk and Other outcomes are blocked for
 explicit semantic review; unknown flags are never assumed false. A valid candidate
 is only REVIEW_REQUIRED, still disabled and unapproved. Liquidity, terms, clocks,
-exception equivalence, horizon, calibration and Eros listing review remain necessary.
+exception equivalence, horizon, calibration and Osyleum listing review remain necessary.
 
 The existing worker's bounded metadata cache retains its original rules-digest
 encoding. It now validates known-field types and duplicate/conflicting event

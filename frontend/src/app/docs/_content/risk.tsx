@@ -136,7 +136,7 @@ h &= h_0 + \frac{|x|}{v} + \text{queue}
         { id: "overview", title: "Overview", body: <>
           <Table rows={[
             ["", "Funding", "Jump premium"],
-            ["Purpose", "Aligns the Olyseum price with the index", "Compensates the reserve for covering deficits"],
+            ["Purpose", "Aligns the Osyleum price with the index", "Compensates the reserve for covering deficits"],
             ["Direction", "Longs pay shorts when the mark is above the index, and the reverse", "Leveraged accounts pay the reserve"],
             ["Fully backed accounts", "Pay or receive funding", "Exempt"],
           ]} />
@@ -165,11 +165,11 @@ h &= h_0 + \frac{|x|}{v} + \text{queue}
         { id: "prices", title: "Price types", body: <Table rows={[
           ["Price", "Definition", "Used for"],
           ["Index", "300-second TWAP of an external reference: Polymarket for external events, the Kuru YES book for native events", "Market anchoring, funding, final-day checks"],
-          ["Perp", "Impact mid of the Olyseum book, sampled by keepers; 60-second TWAP", "Mark construction"],
+          ["Perp", "Impact mid of the Osyleum book, sampled by keepers; 60-second TWAP", "Mark construction"],
           ["Basis", "Perp minus index; 900-second TWAP", "Mark construction"],
           ["Mark", "Median of three estimates, clamped to a band around the index", "Margin, health, liquidation and P&L"],
         ]} /> },
-        { id: "polymarket", title: "External reference", body: <p>For external events, Polymarket is used only as a price reference. Orders are not routed to Polymarket and its liquidity is not used; all trades match on Olyseum, against Olyseum liquidity and collateral. A price publisher fetches the source, validates it and publishes signed observations on chain.</p> },
+        { id: "polymarket", title: "External reference", body: <p>For external events, Polymarket is used only as a price reference. Orders are not routed to Polymarket and its liquidity is not used; all trades match on Osyleum, against Osyleum liquidity and collateral. A price publisher fetches the source, validates it and publishes signed observations on chain.</p> },
         { id: "mark", title: "Mark construction", body: <>
           <Formula tex={String.raw`\begin{aligned}
 \text{mark} &= \operatorname{median}\bigl(\text{index} + \text{basis}_{900},\; \text{perp}_{60},\; \text{live perp impact mid}\bigr) \\

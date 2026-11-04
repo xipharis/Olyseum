@@ -1,11 +1,11 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/akronim26/eros-markets/main/docs/assets/eros-mark-on-dark.svg">
-    <img src="https://raw.githubusercontent.com/akronim26/eros-markets/main/docs/assets/eros-mark-on-light.svg" alt="Eros Markets logo" width="104" height="104">
+    <img src="https://raw.githubusercontent.com/akronim26/eros-markets/main/docs/assets/eros-mark-on-light.svg" alt="Osyleum logo" width="104" height="104">
   </picture>
 </p>
 
-<h1 align="center">Eros Markets</h1>
+<h1 align="center">Osyleum</h1>
 
 <p align="center">Long or short real-world event outcomes. Trade on Monad.</p>
 
@@ -17,13 +17,13 @@
 
 ## Introduction
 
-Eros Markets lets you trade real-world events with leverage on Monad. You go long or short on an event's YES price through an on-chain order book, and when the event resolves, your position settles against what actually happened.
+Osyleum lets you trade real-world events with leverage on Monad. You go long or short on an event's YES price through an on-chain order book, and when the event resolves, your position settles against what actually happened.
 
 Here's the problem we kept running into. A YES token pays 1 USDC if the event happens and nothing if it doesn't, so its price is basically the market's probability. Trading that with leverage works fine while the question is still open. But at resolution the price doesn't drift to 0 or 1, it jumps there in a single block. No liquidator can get in front of that, and a leveraged trader on the wrong side simply can't cover the loss.
 
 So we built around two rules. First, leverage has to come down to `1x` before the jump. Second, whatever losses are still left have to be covered by a reserve that's funded up front. The order book, the margin engine, the reserve and the payouts all live on-chain.
 
-We use **Polymarket as an outside price reference**. Trades don't go to Polymarket and we don't borrow its liquidity. Orders match on Eros, against Eros makers, backed by Eros collateral and reserves. Polymarket just helps us tell what a fair price looks like.
+We use **Polymarket as an outside price reference**. Trades don't go to Polymarket and we don't borrow its liquidity. Orders match on Osyleum, against Osyleum makers, backed by Osyleum collateral and reserves. Polymarket just helps us tell what a fair price looks like.
 
 ## Key Features
 
@@ -102,7 +102,7 @@ Monad testnet (chain ID 10143), deployed 11 October 2026. Each market gets one e
 
 ### Native market: Warriors vs Heat (5 Nov 2026)
 
-An Eros-native prediction market: YES/NO tokens trade on Kuru spot books, and a perp on the same event uses the Kuru YES price as its index. Both resolve through the Eros oracle from API-Sports game 519655.
+An Osyleum-native prediction market: YES/NO tokens trade on Kuru spot books, and a perp on the same event uses the Kuru YES price as its index. Both resolve through the Osyleum oracle from API-Sports game 519655.
 
 - **Perp engine, up to 5× (order book + risk)**: [`0x0ff5EAE643CB7E303f1726A92C03686674D445C0`](https://testnet.monadscan.com/address/0x0ff5EAE643CB7E303f1726A92C03686674D445C0)
 - **SpotMarketFactory**: [`0xC2b9C39F38a7B7783816AfaB4E7Ff7EEf1C1AEdE`](https://testnet.monadscan.com/address/0xC2b9C39F38a7B7783816AfaB4E7Ff7EEf1C1AEdE)
@@ -117,7 +117,7 @@ These run on test USDC with made-up risk calibration, and resolution goes throug
 
 ## Architecture & User Flow
 
-![Eros Markets architecture: external price publication, on-chain execution and risk, collateral, resolution, and indexing](docs/assets/architecture/01-system.svg)
+![Osyleum architecture: external price publication, on-chain execution and risk, collateral, resolution, and indexing](docs/assets/architecture/01-system.svg)
 
 | Layer | What it does |
 | --- | --- |
@@ -191,4 +191,4 @@ The frontend on its own won't start the price publishers, makers, keepers or ind
 - [@xipharis](https://github.com/xipharis)
 - [@Okheer](https://github.com/Okheer)
 
-*Built with ❤️ by Eros Markets*
+*Built with ❤️ by Osyleum*

@@ -16,7 +16,7 @@ export function ThankYou({ hash }: { hash?: string }) {
   const confirmed = receipt.data?.status === "success";
   return <main className="mx-auto flex min-h-[70vh] max-w-[1280px] items-center px-4 py-12 md:px-8 md:py-20">
     <div className="grid w-full gap-10 border-y border-line-strong py-10 md:grid-cols-[minmax(0,1fr)_minmax(240px,0.65fr)] md:items-center md:gap-16">
-      <div><p className="label text-signal-text">Olyseum / Testnet</p><h1 className="display mt-5 text-[clamp(2.75rem,7vw,6rem)] leading-none">Thanks for<br />being early.</h1><p className="mt-6 max-w-lg text-sm leading-relaxed text-fg-2">You’re exploring a new way to trade event probabilities. Thanks for taking Olyseum for a spin.</p>
+      <div><p className="label text-signal-text">Osyleum / Testnet</p><h1 className="display mt-5 text-[clamp(2.75rem,7vw,6rem)] leading-none">Thanks for<br />being early.</h1><p className="mt-6 max-w-lg text-sm leading-relaxed text-fg-2">You’re exploring a new way to trade event probabilities. Thanks for taking Osyleum for a spin.</p>
         <div className="mt-8 flex flex-wrap gap-4"><Link href="/markets" className="ui-button label inline-flex min-h-12 items-center gap-4 bg-action px-5 text-on-action hover:bg-action-hover">Explore markets <ArrowRight size={16} className="ui-nudge" aria-hidden /></Link><Link href="/portfolio" className="label inline-flex min-h-12 items-center gap-2 px-2 text-fg underline underline-offset-4">View portfolio <ArrowUpRight size={15} aria-hidden /></Link></div>
       </div>
       <section aria-label="Visit summary" className="border border-line-strong bg-panel p-5 sm:p-7">

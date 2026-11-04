@@ -204,7 +204,7 @@ manufacture a five-minute window.
 Demo choices are explicit: the source config's diagnostic impact method/N/spread,
 vendor-millisecond flooring, local packet-freeze publication time, unapproved
 quote policy, and a hash of the local demo manifest. These are not Q02-Q10
-approvals or an approved Eros listing. The receiver demonstrates real ingress and
+approvals or an approved Osyleum listing. The receiver demonstrates real ingress and
 index storage; it has no complete margin/funding/settlement engine, book or oracle.
 External-chain transactions remain zero. Operational admission is unchanged.
 
@@ -284,7 +284,7 @@ The eventual output is one signed depth-N observation through
 
 | Field | Solidity type / meaning |
 |---|---|
-| marketId | bytes32; Eros market identity |
+| marketId | bytes32; Osyleum market identity |
 | sourceId | bytes32; pinned independent source |
 | sequence | uint64; durable monotonically increasing source sequence |
 | observedAt | uint64; authentic source time, Unix seconds |
@@ -345,7 +345,7 @@ does not sign or send observations. Source freshness is evaluated from vendor
 time; a running process is not evidence of fresh prices. Shutdown waits for any
 already-running bounded provider request.
 
-Examples are configuration templates for real source tokens, not approved Eros
+Examples are configuration templates for real source tokens, not approved Osyleum
 listings. API access does not establish eligible event semantics. Short-horizon
 markets can be readable while failing the listing horizon. Category labels never
 alter risk economics or select a risk template.

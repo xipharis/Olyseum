@@ -1,4 +1,4 @@
-/* Privy's portal lives outside the page shell. Scope the Olyseum tokens to its stable
+/* Privy's portal lives outside the page shell. Scope the Osyleum tokens to its stable
    dialog IDs; avoid generated SDK class names so wallet and verification screens
    inherit the same palette. Recheck these selectors when upgrading the SDK. */
 #privy-dialog {

@@ -10,8 +10,8 @@ import "./globals.css";
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600"], variable: "--font-dm-sans", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Olyseum — Trade the odds on what happens next", template: "%s · Olyseum" },
-  description: "Olyseum is a prediction market on Monad. Buy YES or NO on real-world questions, with optional leverage. Explore the testnet.",
+  title: { default: "Osyleum — Trade the odds on what happens next", template: "%s · Osyleum" },
+  description: "Osyleum is a prediction market on Monad. Buy YES or NO on real-world questions, with optional leverage. Explore the testnet.",
 };
 
 export const viewport: Viewport = {
@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 // Applies a saved theme before first paint so a dark-mode viewer never sees a white flash.
-const THEME_SCRIPT = `try{var t=localStorage.getItem("olyseum-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+const THEME_SCRIPT = `try{var t=localStorage.getItem("osyleum-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

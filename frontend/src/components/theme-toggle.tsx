@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
-const KEY = "olyseum-theme";
+const KEY = "osyleum-theme";
 type Theme = "light" | "dark";
 
 const systemTheme = (): Theme => window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";

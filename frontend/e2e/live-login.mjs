@@ -38,7 +38,7 @@ try {
     });
   }
   const page = await context.newPage(); await page.goto(`${baseURL}/m/${report.market}`); await page.bringToFront();
-  await page.evaluate(() => { document.title = 'EROS E2E CHECKPOINT — Visible Chrome'; });
+  await page.evaluate(() => { document.title = 'OSYLEUM E2E CHECKPOINT — Visible Chrome'; });
   if (await page.getByText(/LOCAL E2E FIXTURE/).count()) throw new Error('Public checkpoint accidentally points at fixture build');
   const login = page.locator('header').getByRole('button', { name: 'Log in', exact: true });
   await page.locator('header').getByRole('button', { name: /^(Log in|Manage wallet 0x)/ }).waitFor({ state: 'visible', timeout: 60_000 });

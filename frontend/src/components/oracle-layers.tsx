@@ -81,7 +81,7 @@ export function OracleLayers() {
       </div>
       <div className={styles.content}>
         <div className={styles.visual} onPointerMove={move} onPointerLeave={resetPointer}>
-          <div className={styles.registration} aria-hidden><span>EROS / ORACLE</span><span>01 — 03</span></div>
+          <div className={styles.registration} aria-hidden><span>OSYLEUM / ORACLE</span><span>01 — 03</span></div>
           <div ref={scene} className={styles.scene}>
             <OracleScene active={active} playing={playing} reduced={reduced} onInspect={setActive} />
           </div>

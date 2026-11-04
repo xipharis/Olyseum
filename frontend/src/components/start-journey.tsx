@@ -61,7 +61,7 @@ export function StartJourney() {
       title: "Log in", done: loggedIn,
       summary: owner.address ? `Signed in as ${shortAddr(owner.address)}` : undefined,
       body: <>
-        <p>Use email or Google and Olyseum creates a wallet for you, or connect a wallet you already have. Trades in a Privy wallet are signed instantly, without pop-ups.</p>
+        <p>Use email or Google and Osyleum creates a wallet for you, or connect a wallet you already have. Trades in a Privy wallet are signed instantly, without pop-ups.</p>
         {owner.connected && owner.wrongChain
           ? <Button variant="primary" size="lg" arrow className="self-start" onClick={() => switchChain({ chainId: chain.id })}>Switch to Monad testnet</Button>
           : <Button variant="primary" size="lg" arrow className="self-start" disabled={!login.ready} onClick={() => login.login()}>Log in</Button>}

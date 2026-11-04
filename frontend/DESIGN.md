@@ -1,5 +1,5 @@
 ---
-name: Eros Markets
+name: Osyleum
 description: Binary event perpetuals on Monad, drawn as a dark engineering sheet in four colours: black, white, orange and green.
 colors:
   ground: "#000000"
@@ -154,13 +154,13 @@ components:
     textColor: "{colors.fg}"
 ---
 
-# Design System: Eros Markets
+# Design System: Osyleum
 
 ## Overview
 
 **Creative North Star: "The Engineering Sheet"**
 
-Every surface is a drawing on squared paper: an White ground pricked with a dot grid, regions boxed in hard one-pixel Black frames, labels set in uppercase mono as if stencilled onto the sheet, and one Signal orange reserved for the thing that matters right now (the mark price, the primary action, live risk). The world is the user-pinned v0 "Brutalist AI SaaS" template translated into Eros colours and sharpened: its rounded pills become square frames, its invented demo metrics are replaced by live chain values.
+Every surface is a drawing on squared paper: an White ground pricked with a dot grid, regions boxed in hard one-pixel Black frames, labels set in uppercase mono as if stencilled onto the sheet, and one Signal orange reserved for the thing that matters right now (the mark price, the primary action, live risk). The world is the user-pinned v0 "Brutalist AI SaaS" template translated into Osyleum colours and sharpened: its rounded pills become square frames, its invented demo metrics are replaced by live chain values.
 
 Density is trader-grade. The terminal packs a market rail, a chart and book on one shared probability axis, a ticket, and account tables inside a single frame, separated by rules rather than gaps. Marketing and index pages loosen to a 1280px column of framed bento panels, each introduced by a numbered `// SECTION` rule. Inverted Black panels (the landing's live terminal, the middle resolution layer) are the only change of material; there is no drop shadow, glow, blur or shading gradient anywhere.
 

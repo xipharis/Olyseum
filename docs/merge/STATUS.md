@@ -1303,3 +1303,18 @@ failure or new A-I01 regression was found; lifecycle-policy changes require sepa
 - Open (user): create the Vercel and Render services, set `wake.url`, fund the leveraged account
   (about 330 TestUSDC) so the market can sleep, and add a remote alert channel (alerts are
   macOS-only).
+
+### 2026-11-04 (BRAND-OSYLEUM) — rename to Osyleum and 5x demo risk profile — pushed to main
+- Who: Claude Code, pushing existing uncommitted working-tree changes at the user's request.
+- What: display name changed to Osyleum across docs, frontend copy and `packages/pricefeed/docs`;
+  frontend package renamed `osyleum-frontend`. `isNativeMarket` and the `source` strings in
+  `market-metadata.json` changed together, so they still match.
+- Risk: `frontend/src/config/risk-calibrations.json` gains a SYNTHETIC demo-only fixture profile
+  for the native 5x perp (epsilon 0.25). It is not empirical calibration.
+- Commit: the commit carrying this entry, on `main` (single-branch rule set by the user 2026-11-04).
+- Tests (exit 0): `frontend`: `npm run typecheck`; `npm test` 155/155.
+- Not run: `test:integration`, `test:e2e`, `next build`, gates, contract tests. No contract source
+  changed.
+- Open: `frontend/e2e/support/local-deployment.ts` still matches `"Eros native"`, and 194 tracked
+  files still contain "Eros Markets", including on-chain listing artifacts that should stay as
+  recorded.

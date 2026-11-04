@@ -370,7 +370,7 @@ export function SpotWorkspace({ manifest, halted, spot, trades, live }: { manife
   </div>;
 }
 
-/** "Trade this event as": perp on Olyseum, or the YES/NO tokens on Kuru. */
+/** "Trade this event as": perp on Osyleum, or the YES/NO tokens on Kuru. */
 export function VenueBar({ s, engine, venue, onChange }: { s?: SpotSnapshot; engine: Address; venue: "perp" | "spot"; onChange: (v: "perp" | "spot") => void }) {
   const b = nativeBinding(engine)!;
   const q = (o: Outcome) => s ? `${s.books[o].bids[0] ? tickToPrice(s.books[o].bids[0].tick) : "—"} / ${s.books[o].asks[0] ? tickToPrice(s.books[o].asks[0].tick) : "—"}` : "…";

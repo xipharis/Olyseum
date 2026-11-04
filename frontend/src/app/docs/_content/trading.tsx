@@ -195,7 +195,7 @@ export const trading: DocGroup = {
       summary: "Automated rules that submit reduce-only orders, cancellations or claims on the user's behalf.",
       sections: [
         { id: "overview", title: "Overview", body: <>
-          <p>A protection rule monitors a position and submits a single transaction when its condition is met. Rules are executed by the Olyseum automation worker using the <strong>Background protection</strong> permission (see <Link href="/docs/wallets#permissions">Delegated permissions</Link>).</p>
+          <p>A protection rule monitors a position and submits a single transaction when its condition is met. Rules are executed by the Osyleum automation worker using the <strong>Background protection</strong> permission (see <Link href="/docs/wallets#permissions">Delegated permissions</Link>).</p>
           <p>Requirements: an embedded Privy wallet, the permission granted for the market, and an online worker. The Protection tab reports any missing requirement.</p>
         </> },
         { id: "rules", title: "Rule types", body: <Table rows={[
@@ -227,7 +227,7 @@ export const trading: DocGroup = {
       summary: "Trading native YES and NO outcome tokens on Kuru.",
       sections: [
         { id: "overview", title: "Overview", body: <>
-          <p><strong>Native</strong> markets are events listed by Olyseum directly rather than referenced from Polymarket. Each native market has a vault that issues a YES token and a NO token, which trade on Kuru order books on Monad.</p>
+          <p><strong>Native</strong> markets are events listed by Osyleum directly rather than referenced from Polymarket. Each native market has a vault that issues a YES token and a NO token, which trade on Kuru order books on Monad.</p>
           <p>Spot trading involves no leverage, margin, funding or liquidation. Tokens are bought and sold outright, and winning tokens are redeemed for collateral after resolution. Native perpetual markets derive their index from the Kuru YES book.</p>
         </> },
         { id: "pairs", title: "Minting and redeeming pairs", body: <>

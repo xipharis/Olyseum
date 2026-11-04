@@ -51,7 +51,7 @@ export const lifecycle: DocGroup = {
             ["3. Optimistic verification", "Proposals are posted as bonded assertions through UMA's optimistic oracle", "Every proposal from layers 1 and 2"],
           ]} />
           <p>Every proposal is bonded and can be disputed before it becomes final.</p>
-          <Note>On testnet, layer 1 runs on a single simulation node rather than a Chainlink DON, and disputes are decided by the Olyseum team through a sandbox oracle rather than by UMA voters.</Note>
+          <Note>On testnet, layer 1 runs on a single simulation node rather than a Chainlink DON, and disputes are decided by the Osyleum team through a sandbox oracle rather than by UMA voters.</Note>
         </> },
         { id: "outcomes", title: "Outcomes", body: <Table rows={[
           ["Outcome", "Claim payout"],

@@ -41,7 +41,7 @@ cd oracle && NATIVE_PARAMS=deployments/native/<name>.params.json $F script scrip
   --skip UmaImports --skip 'test/**' --rpc-url $RPC --broadcast --private-key $LISTER_KEY
 ```
 
-The script refuses to run again if `out` exists. Kuru precision 1000/1000 makes 1 Kuru size unit = 1 Eros lot and 1 price unit = 1 tick.
+The script refuses to run again if `out` exists. Kuru precision 1000/1000 makes 1 Kuru size unit = 1 Osyleum lot and 1 price unit = 1 tick.
 
 ## 2. Rules hash and listing fields (NM-F02)
 
@@ -58,7 +58,7 @@ Copy the printed `engineListing` values into `oracle/deployments/native/<name>.l
  "depthNLots":100000,"maxSpreadWad":50000000000000000}
 ```
 
-N = 100 claims with a 0.05 spread. Both native YES depth and Eros perp depth must cover N on each side.
+N = 100 claims with a 0.05 spread. Both native YES depth and Osyleum perp depth must cover N on each side.
 
 ## 3. List, bind and activate (NM-D04/D05, NM-G01)
 
@@ -154,7 +154,7 @@ RPC=… D=<deployment.json> MAKER_KEY=<spot maker> TAKER_KEYS=<k1,k2,k3> STRIKE=
   node packages/pricefeed/dist/scripts/native-sim.js
 ```
 
-- **Maker:** quotes around a fair value from outside Eros (Kraken BTC model), skewed by its inventory; rate-limited; posts new quotes before cancelling old ones; cancels its own leftover orders at startup.
+- **Maker:** quotes around a fair value from outside Osyleum (Kraken BTC model), skewed by its inventory; rate-limited; posts new quotes before cancelling old ones; cancels its own leftover orders at startup.
 - **Takers:** noise, momentum and contrarian bots.
 - **Cost:** about 0.1–0.2 MON per maker re-quote and 0.03 MON per taker trade.
 - **Label:** everything it produces is controlled team activity.
@@ -221,5 +221,5 @@ Limits:
 - **1× only:** funding off; no calibration; no leverage on native-priced markets.
 - **Movement guard:** a > 0.10 INDEX move within 300 s latches reduce-only until the monitor clears it.
 - **Single host:** the bots run on one laptop under `ops.sh`; they stop if it sleeps. There is no redundancy, and the Polymarket supervisor integration was not done.
-- **Kuru availability:** Kuru-held tokens must be withdrawn before redemption. Third-party trading on Kuru cannot be halted by Eros.
+- **Kuru availability:** Kuru-held tokens must be withdrawn before redemption. Third-party trading on Kuru cannot be halted by Osyleum.
 - **Not built:** the frontend Spot tab (split, merge, redeem, Kuru ticket) and the indexer (chart history beyond the RPC's ~30 s window). Both are tracked as optional.

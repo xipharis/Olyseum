@@ -37,5 +37,44 @@
       }
     },
     "profileHash": "0xc724453e2a349e70464ff24a03e149ca502fb7341735b82453a407291dd223aa"
+  },
+  {
+    "kind": "fixture",
+    "description": "SYNTHETIC demo-only profile (user-requested 2026-11-04) for the native 5x perp: epsilon raised from 0.01 to 0.25 so 5x is admissible near resolution. Not empirical calibration.",
+    "riskParams": {
+      "h0Secs": "300",
+      "absorptionClaimsPerMin": "1000",
+      "queueSecs": "0",
+      "hazard0WadPerDay": "100000000000000",
+      "hazard1WadPerDay": "100000000000000",
+      "epsilonWad": "250000000000000000",
+      "gammaWad": "1500000000000000000",
+      "sWad": "5000000000000000",
+      "lambdaWadPerClaim": "1000000000000",
+      "template": 0,
+      "calibrated": true,
+      "deploymentCapX": "5",
+      "realized": {
+        "hSecs": [
+          "2592000"
+        ],
+        "sigmaWad": [
+          "0"
+        ],
+        "validFrom": "1791923037",
+        "validUntil": "1793934000"
+      },
+      "templateEnv": {
+        "hSecs": [
+          "2592000"
+        ],
+        "sigmaWad": [
+          "0"
+        ],
+        "validFrom": "1791923037",
+        "validUntil": "1793934000"
+      }
+    },
+    "profileHash": "0x17eaf089d83f2553f8fa59518e187eee7bda427070a1203e5a570332d490744d"
   }
 ]

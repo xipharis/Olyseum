@@ -55,7 +55,7 @@ export function TopBar() {
   return (
     <header className="glass sticky top-0 z-30 border-b border-line">
       <div className="mx-auto flex h-16 max-w-[1320px] items-center gap-4 px-4 md:gap-6 md:px-6">
-        <Link href="/" className="flex shrink-0 items-center" aria-label="Olyseum home">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="Osyleum home">
           <BrandImage />
         </Link>
         <div className="hidden min-w-0 flex-1 md:flex"><HeaderSearch /></div>
@@ -101,7 +101,7 @@ export function TestnetStrip() {
         <span className="font-medium text-signal-text">Testnet</span>
         <span>Collateral is a test token with no monetary value</span>
         <span aria-hidden className="max-md:hidden">·</span>
-        <span className="max-md:hidden">Prices from Polymarket and Olyseum native (Kuru) books</span>
+        <span className="max-md:hidden">Prices from Polymarket and Osyleum native (Kuru) books</span>
       </p>
     </div>
   );

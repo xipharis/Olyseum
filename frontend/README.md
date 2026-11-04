@@ -1,6 +1,6 @@
-# Olyseum frontend
+# Osyleum frontend
 
-A prediction-market interface for the Eros Markets contracts, forked from `eros-markets/frontend`.
+A prediction-market interface for the Osyleum contracts, forked from `eros-markets/frontend`.
 The data layer (`src/lib`, `src/server`, `src/config`, `src/abi`, `src/app/api`) is unchanged apart
 from one RPC fix; the presentation is new: a light theme borrowed from the Grass site (DM Sans,
 white ground, soft grey cards, amber mark) and a Polymarket-style flow — a market board of YES/NO

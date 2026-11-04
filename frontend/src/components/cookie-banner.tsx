@@ -34,7 +34,7 @@ export function CookieBanner() {
   if (!open) return null;
   return <aside ref={panel} tabIndex={-1} aria-labelledby="cookie-title" className="fixed inset-x-3 bottom-3 z-40 mx-auto max-h-[70dvh] max-w-3xl overflow-y-auto border border-line-strong bg-ground p-4 shadow-lg sm:p-5" onKeyDown={(e) => { if (e.key === "Escape") dismiss(); }}>
     <div className="flex items-center gap-3"><ShieldCheck size={19} className="text-signal-text" aria-hidden /><h2 id="cookie-title" className="text-sm font-semibold">A note on cookies & storage</h2></div>
-    <p className="mt-3 text-xs leading-relaxed text-fg-2">Sign-in and wallet services use browser storage. Olyseum also remembers your theme and recent order IDs on this device. We haven’t added advertising or optional analytics tools.</p>
+    <p className="mt-3 text-xs leading-relaxed text-fg-2">Sign-in and wallet services use browser storage. Osyleum also remembers your theme and recent order IDs on this device. We haven’t added advertising or optional analytics tools.</p>
     <div className="mt-3 flex flex-wrap items-center justify-between gap-3"><Link href="/privacy#browser-storage" className="inline-flex min-h-11 items-center text-xs underline underline-offset-4">How storage is used</Link><Button variant="primary" className="min-h-11 px-6" onClick={dismiss}>Got it</Button></div>
   </aside>;
 }

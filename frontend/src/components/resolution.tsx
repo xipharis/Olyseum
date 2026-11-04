@@ -78,7 +78,7 @@ export function ResolutionPage() {
         proposal open to dispute before it becomes final. Payouts open only after the market&apos;s own settlement is prepared.
       </p>
       <p className="mt-6 max-w-3xl border-t border-b border-line py-3 text-xs leading-relaxed text-fg-2">
-        Disputes on testnet are decided by the Olyseum team through a sandbox oracle, not by UMA voters. Layer 1 runs on a single
+        Disputes on testnet are decided by the Osyleum team through a sandbox oracle, not by UMA voters. Layer 1 runs on a single
         simulation node, not a Chainlink DON.
       </p>
       <div className="mt-10">

@@ -1,4 +1,4 @@
-# Eros Markets Oracle — Implementation Plan (Layers 1–3)
+# Osyleum Oracle — Implementation Plan (Layers 1–3)
 
 Oct 2, 2026 · @Claude
 
@@ -27,7 +27,7 @@ Precedence when sources disagree, highest first:
 
 1. **Engine seam already in the repo**: `docs/spec/oracle_interface.md` and `contracts/src/interfaces/IResolutionIngress.sol`. The engine is built against these, so the oracle conforms to them.
 2. **Finalized workflow audit** (`claude/eros-workflow-audit-2026-09-30.md`, EM-01…EM-35 and D-01…D-16). It overrides the Oracle spec wherever it changed a rule.
-3. **Eros Markets Oracle: Full Spec (Layers 1–3)**, 30 Sep 2026.
+3. **Osyleum Oracle: Full Spec (Layers 1–3)**, 30 Sep 2026.
 4. **Build Spec** §§7, 10, 14–17. Its §15 is replaced by the Oracle spec.
 5. `eventperp-design.pdf` is historical only. Its CRE-receiver/`submitVotes` design is superseded.
 
@@ -157,7 +157,7 @@ A wrong outcome settles only if (a) its proposer is wrong **and** nobody dispute
 | D16 | **Request rate limit.** `requestResolution` re-emits at most once per `minRequestInterval` (4 min) per market; inside the interval it returns `false` without an event. | EM-28; CRE log trigger limit 10 per 6 s |
 | D17 | **Committee may also propose in `Open`**, with a treasury bond and reviewed liveness. | Additive; fewer voids when no public proposer bonds up |
 | D18 | **Separate Foundry project `oracle/`.** `contracts/foundry.toml` pins solc 0.8.30 and UMA OOv3 is `pragma 0.8.16`. A separate project with auto-detect compiles both, imports the engine read-only via remappings, and keeps ownership clean. | Verified (Appendix A) |
-| D19 | **The claim has no UMA size limit.** OOv3 stores the claim only in the `AssertionMade` event; the DVM sees the `assertionId`/`ooAsserter` stamp. Eros caps the rendered claim at 16 KiB for gas. | Verified in OOv3 source (V-U2) |
+| D19 | **The claim has no UMA size limit.** OOv3 stores the claim only in the `AssertionMade` event; the DVM sees the `assertionId`/`ooAsserter` stamp. Osyleum caps the rendered claim at 16 KiB for gas. | Verified in OOv3 source (V-U2) |
 | D20 | **No callbacks into ResolutionOracle and no pause.** Every progress path is permissionless, so no admin action can strand a market. | Spec §6.7/ORC-9 |
 
 ## 5. Resolution state machine (normative)
@@ -969,7 +969,7 @@ Envio supports Monad testnet (chain 10143, HyperSync `https://monad-testnet.hype
 - **Detail view:** question; rules; proposed outcome and path; evidence link and hash (or the L1 value hash and source URL); panel labels and the candidate; bond; assertion expiry; `voidDeadline`; attempt and rejected outcomes.
 - **Dispute button.** `usdc.approve(OOv3, bond)` then `OOv3.disputeAssertion(assertionId, user)`, with the exact bond and a liveness countdown. Show pending → final using Monad's `latest` → `finalized` states.
 - **Propose button** (Open state). `usdc.approve(UmaAdapter, B)` then `proposePermissionless(id, outcome, uri, hash)`. Rejected outcomes are disabled.
-- **Testnet banner:** "Disputes on testnet are decided by the Eros team through a sandbox oracle, not by UMA voters." With the `--listen` simulator: "Layer 1 runs on a single simulation node, not a Chainlink DON."
+- **Testnet banner:** "Disputes on testnet are decided by the Osyleum team through a sandbox oracle, not by UMA voters." With the `--listen` simulator: "Layer 1 runs on a single simulation node, not a Chainlink DON."
 - **Payouts.** Never show "paid" from oracle Final alone; use the engine's `claimsEnabled` and the risk-sdk `settlement.ts` states.
 
 ## 10. Validation pipeline (opens the Layer 2 auto-gate)
@@ -1170,7 +1170,7 @@ Commit `oracle/workflows/resolution/bun.lock`, because the job installs with `--
 Approval is manual; simulation works without it.
 
 1. Create a Chainlink account and organization at app.chain.link (CRE), then `cre login` (browser login) and `cre whoami`.
-2. Request deploy access with `cre account access`. Describe the use case: "Eros Markets: generic Layer 1 resolution workflow on Monad; EVM log trigger on ResolutionRequested; one HTTP GET to an allow-listed sports/data API; identical consensus; writes YES/NO reports to our ResolutionOracle receiver; \~N markets/day". The CRE team replies by email.
+2. Request deploy access with `cre account access`. Describe the use case: "Osyleum: generic Layer 1 resolution workflow on Monad; EVM log trigger on ResolutionRequested; one HTTP GET to an allow-listed sports/data API; identical consensus; writes YES/NO reports to our ResolutionOracle receiver; \~N markets/day". The CRE team replies by email.
 3. Registry: use **private** (`deployment-registry: "private"`). No linked key or ETH is needed. If you choose onchain later, run `cre account link-key` and fund that key with ETH on Ethereum mainnet.
 4. Record the **organization owner address**, printed by `cre workflow deploy` and by `cre workflow list --registry private --output json` (`ownerAddress`). This is `TrustSet.workflowOwner`.
 5. Quota: 3 workflows per org. Agree with CP-PRICE now: resolution + index relay + 1 spare.
@@ -1728,7 +1728,7 @@ Every oracle-relevant audit finding and spec requirement maps to a section here,
 ## Sources
 
 - Repo: [akronim26/eros-markets](https://github.com/akronim26/eros-markets) `main` @ `c5db208` (read through the linked computer; read-only).
-- Project files: *Eros Markets Oracle: Full Spec (Layers 1–3)*, *Eros Markets: Leveraged Perps on Binary Outcomes — Build Spec*, `claude/eros-workflow-audit-2026-09-30.md`, architecture boards 04 and 08.
+- Project files: *Osyleum Oracle: Full Spec (Layers 1–3)*, *Osyleum: Leveraged Perps on Binary Outcomes — Build Spec*, `claude/eros-workflow-audit-2026-09-30.md`, architecture boards 04 and 08.
 - Chainlink CRE: [CLI install](https://docs.chain.link/cre/getting-started/cli-installation/macos-linux), [workflow CLI reference](https://docs.chain.link/cre/reference/cli/workflow); `@chainlink/cre-sdk` 1.23.0 package source.
 - Monad: [Verify a contract with Foundry](https://docs.monad.xyz/guides/verify-smart-contract/foundry), [Multisig wallets](https://docs.monad.xyz/tooling-and-infra/wallets/multisig-wallets).
 - Envio: [Monad testnet support](https://envio.dev/chains/monad-testnet).
@@ -1737,7 +1737,7 @@ Every oracle-relevant audit finding and spec requirement maps to a section here,
 
 ---
 
-> Snapshot of the Claude Docs doc "Eros Markets Oracle — Implementation Plan" (https://claude.ai/code/artifact/d11087f7-8058-4f10-b941-ecc02d6fcacd), taken 2 Oct 2026 after the final re-audit. The doc is the source of truth; this file holds its three tabs in order: Implementation plan, Appendix C, Appendix B.
+> Snapshot of the Claude Docs doc "Osyleum Oracle — Implementation Plan" (https://claude.ai/code/artifact/d11087f7-8058-4f10-b941-ecc02d6fcacd), taken 2 Oct 2026 after the final re-audit. The doc is the source of truth; this file holds its three tabs in order: Implementation plan, Appendix C, Appendix B.
 
 ---
 
@@ -1782,7 +1782,7 @@ Access rules every implementation enforces:
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-// Normative types for the Eros Markets oracle. Enum values are ABI: never reorder or insert.
+// Normative types for the Osyleum oracle. Enum values are ABI: never reorder or insert.
 // The CRE workflow hard-codes RState.L1Pending == 3.
 
 enum Outcome {
@@ -2575,7 +2575,7 @@ This code compiled and passed the tests in Appendix A (main tab); use it as the 
 In the repo, put this at `oracle/workflows/resolution/main.ts` and change the evaluator import to `../../packages/feedspec/src/index` (checked to typecheck and compile in that layout, §7.2). `package.json` and `tsconfig.json` are in §7.2; the versions that passed are `@chainlink/cre-sdk` 1.23.0, `viem` 2.57.2, `zod` 4.6.5. All Solidity in this tab is `forge fmt` clean under Foundry 1.8.3, as CI requires.
 
 ```ts
-// Eros Markets — Layer 1 resolution workflow (Oracle spec §5). One generic workflow for all
+// Osyleum — Layer 1 resolution workflow (Oracle spec §5). One generic workflow for all
 // Layer 1 markets; per-market data is read from chain. Writes only YES/NO reports.
 import {
   bytesToHex,
@@ -3433,7 +3433,7 @@ interface IAssertionVenue {
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-/// @notice Minimal MIT re-declaration of the UMA OOv3 functions Eros calls (signatures match
+/// @notice Minimal MIT re-declaration of the UMA OOv3 functions Osyleum calls (signatures match
 ///         UMAprotocol/protocol packages/core/contracts/optimistic-oracle-v3). No UMA code is copied.
 interface IOptimisticOracleV3 {
     struct EscalationManagerSettings {
@@ -3542,7 +3542,7 @@ interface IIdWl {
     function addSupportedIdentifier(bytes32) external;
 }
 
-/// Real UMA OOv3 (0.8.16, deployed from artifacts) + Eros adapter + team-gated sandbox oracle.
+/// Real UMA OOv3 (0.8.16, deployed from artifacts) + Osyleum adapter + team-gated sandbox oracle.
 contract UmaVenueTest is Test {
     MockUSDC usdc;
     IOptimisticOracleV3 oov3;
@@ -3583,7 +3583,7 @@ contract UmaVenueTest is Test {
         usdc.approve(address(adapter), bond);
         vm.prank(oracle);
         id = adapter.assertOutcome(
-            IAssertionVenue.AssertRequest(MARKET, bytes("Eros Markets market ... YES"), treasury, treasury, 7200, bond)
+            IAssertionVenue.AssertRequest(MARKET, bytes("Osyleum market ... YES"), treasury, treasury, 7200, bond)
         );
     }
 

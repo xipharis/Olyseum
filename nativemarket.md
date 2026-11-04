@@ -1,10 +1,10 @@
-I want you to act as a protocol architect and perform a deep architecture review of my current Eros Market project.
+I want you to act as a protocol architect and perform a deep architecture review of my current Osyleum Market project.
 
 The project already has an existing codebase and architecture. Do NOT rely on a predefined architecture description from me unless something is genuinely missing.
 
 Your first task is to inspect the current state of the repository thoroughly and reconstruct how the system works today.
 
-Then design the best architecture for ADDING an Eros-native prediction market alongside the existing external-market integrations.
+Then design the best architecture for ADDING an Osyleum-native prediction market alongside the existing external-market integrations.
 
 The native market is an addition, not a replacement.
 
@@ -67,7 +67,7 @@ the simplest credible implementation we should build now.
 Production evolution:
 how this component should be upgraded later.
 
-The most important objective is to build a working architecture that demonstrates the Eros thesis clearly, not to prematurely build a production-grade protocol.
+The most important objective is to build a working architecture that demonstrates the Osyleum thesis clearly, not to prematurely build a production-grade protocol.
 
 You have full access to the repository. Do not ask me to describe the existing architecture unless the answer cannot be determined from the code, tests, documentation, configuration, or git state.
 
@@ -181,7 +181,7 @@ Do not research for completeness alone. Focus on information that materially aff
 
 ## Core design question
 
-I want to add a first-party Eros prediction market.
+I want to add a first-party Osyleum prediction market.
 
 For a binary event such as:
 
@@ -199,17 +199,17 @@ the system should support:
 - resolution
 - redemption
 
-The native market should also be able to act as a price source for Eros event perpetuals.
+The native market should also be able to act as a price source for Osyleum event perpetuals.
 
 Conceptually:
 
 External venues ──────┐
                       │
-Eros native market ───┼→ validated price layer
+Osyleum native market ───┼→ validated price layer
                       │
 Future venues ────────┘
                               ↓
-                          Eros INDEX
+                          Osyleum INDEX
                               ↓
                       MARK / Risk / Perps
 
@@ -247,7 +247,7 @@ Determine:
 
 Then compare it against:
 
-- building an Eros CLOB
+- building an Osyleum CLOB
 - using an AMM
 - hybrid approaches
 
@@ -277,7 +277,7 @@ For the hackathon, determine whether this arbitrage must be automated or whether
 
 ## Native price feed
 
-Design the simplest credible mechanism for turning native trading activity into an Eros price observation.
+Design the simplest credible mechanism for turning native trading activity into an Osyleum price observation.
 
 Compare:
 
@@ -323,7 +323,7 @@ Do not build sophisticated multi-source consensus unless there is a compelling r
 For example, if:
 
 Polymarket = 0.64  
-Eros native = 0.61
+Osyleum native = 0.61
 
 the hackathon implementation does not necessarily need a complex weighted oracle.
 
@@ -344,9 +344,9 @@ Recommend the simplest credible approach.
 
 Avoid:
 
-Eros-controlled market maker
+Osyleum-controlled market maker
 → creates trades
-→ Eros considers those trades independent market information
+→ Osyleum considers those trades independent market information
 → risk engine consumes that price
 
 A protocol market maker may provide liquidity.
@@ -356,7 +356,7 @@ But explain the minimum separation required during the hackathon between:
 - liquidity provision
 - user trades
 - observed market price
-- Eros INDEX
+- Osyleum INDEX
 
 Do not over-engineer this separation, but do not ignore the circularity problem.
 
@@ -483,10 +483,10 @@ Phase 4:
 read native market price
 
 Phase 5:
-feed native observation into existing Eros pricing
+feed native observation into existing Osyleum pricing
 
 Phase 6:
-open an Eros perp using native INDEX
+open an Osyleum perp using native INDEX
 
 Phase 7:
 resolve event and settle
@@ -526,4 +526,4 @@ The final answer should make it immediately obvious what we need to implement fo
 
 The objective is not to design the theoretically perfect protocol.
 
-The objective is to build the smallest technically credible Eros-native market architecture that integrates cleanly with the existing project, demonstrates the idea convincingly, and gives us a strong path toward a production design later.
+The objective is to build the smallest technically credible Osyleum-native market architecture that integrates cleanly with the existing project, demonstrates the idea convincingly, and gives us a strong path toward a production design later.
