@@ -1,0 +1,97 @@
+# Merge prep: `origin/main` into `integration/risk` (dry run; nothing merged into main)
+
+## Actual reconciliation — 2026-10-03
+
+The human authorized merging `origin/main` **into `integration/risk`**, not updating main.
+Merge commit: `13ca730150b42b7164c6fb5027d39ee2862e7eca`; parents `a9d8ae7` and
+`a114d06a1cebdf107c47d75947b114b3dd94b60e`. No deployment or G7 acceptance is implied.
+
+| Conflict / hazard | Resolution |
+| --- | --- |
+| `CLAUDE.md` | Retained the newer shared, turn-by-turn workflow and independent economic review rule. |
+| `foundry.toml` | Retained main's default 131072-byte setting and the risk/ci 1000000-byte fixture allowance. The target-chain limit remains independently unverified. |
+| `OrderAdmission.sol` | Retained the stronger reviewed voluntary-reduction predicate; shared its identical snapshot calculation as `_snapAt` for liquidation callers. |
+| `TradePreview.sol` | Retained projected post-accrual balances for release decisions, not stale booked cash. |
+| `MockBookAdapter.sol` | Retained canonical types and the current integration behavior, then formatted with forge 1.8.3. |
+| Auto-merged `BookRiskAdapter` | Removed duplicate main `_reductionOk` checks; retained the stronger integration predicate, including stale-mark full backing and no flip. |
+| Main liquidation repair | Retained `e643b4c`: recheck health after pairing, and do not sell a healthy remainder merely because caller budget remains. |
+| Provisional types | Migrated imports and enum references in Book, four book fixtures and appended B024/B032 tests to the existing canonical `MathTypes.Side` / `RiskTypes`; did not restore duplicate types. |
+| Formatting | Applied pinned forge 1.8.3 formatting. The merge does not change A's custody/funding/premium behavior; those modules have no whitespace-insensitive delta. |
+
+Book's matching algorithm is taken from main; the local Book change is type/import compatibility.
+The initial merged `test/Book*.t.sol` run passed 123 tests. Full real-A+B+Book, gate and full-suite
+evidence is recorded in `artifacts/risk/merge-validation-2026-10-03.json` after validation.
+
+## Historical current-head warning
+
+The rehearsal below is historical: it used main `c5db208`, not current `a114d06`.
+The new main includes book-hook implementation and economic risk fixes. A read-only merge-tree
+against integration `2506235` finds five conflicts (adds `CLAUDE.md` and `OrderAdmission.sol`
+to the three below), plus provisional-type imports and snapshot-helper/reduction-check hazards
+in automatically merged files. See `history-review-2026-10-03.md` for the current assessment.
+Do not reuse the three-file resolution as evidence that the current merge is safe or tested.
+
+## Historical rehearsal
+
+- Prepared 2026-10-02 by 0xr10t (with Claude agent).
+- Branch: local `scratch/main-merge-prep`, never pushed.
+- No merge into `main` was made and none is authorized. A human decides when to merge.
+
+## Inputs
+
+- `integration/risk` at `e61c8a7`.
+- `origin/main` at `c5db208`. It is unchanged since 2026-10-01.
+- Merge base: `ffc9f52`.
+- Main-only commits:
+  - `ff05f0c` (book: configurable fill bound, with BookGas snapshot and book tests)
+  - `5cbd0cb` (book README)
+  - `494dc72` (earlier merge of feat/risk)
+  - `2db4e08` and `c5db208` (Monad size limit)
+  - `253ebd5` (book developer's reformat of Risk files)
+- Scratch merge commit: `8b71ed7` (local only). To reproduce:
+  `git switch -c scratch/main-merge-prep e61c8a7 && git merge --no-ff origin/main`.
+
+## Conflicts and resolutions
+
+| File | Cause | Resolution |
+|---|---|---|
+| `contracts/foundry.toml` | main sets `code_size_limit = 131072` (Monad) in the default profile; we set 1,000,000 for the `ci` and `risk` test profiles | Keep main's default 131072. Keep the `ci`/`risk` 1,000,000 limits for test harnesses only (CombinedBase embeds three engines; forge 1.8.3 checks test contracts too), with a comment |
+| `contracts/src/risk/TradePreview.sol` | `253ebd5` reformat versus our later content changes | `git diff ffc9f52 origin/main` shows formatting only. Keep ours, then `forge fmt` |
+| `contracts/test/mocks/B/MockBookAdapter.sol` | `253ebd5` reformat (one import line) | Formatting only. Keep ours, then `forge fmt` |
+
+- The other files that `253ebd5` reformatted merge automatically.
+- After the merge, `forge fmt` (forge 1.8.3) reformatted 26 Risk & Clearing files:
+  - 3 under `contracts/src`
+  - 23 tests and mocks
+- No book-team file was touched by the formatter.
+
+## Results on the scratch merge (`8b71ed7`, forge 1.8.3)
+
+| Command | Exit | Result |
+|---|---|---|
+| `forge fmt --check` | 0 | clean |
+| `FOUNDRY_PROFILE=ci forge build --sizes` | 0 | `CombinedEngine` runtime 112,924 B, initcode 121,706 B |
+| `FOUNDRY_PROFILE=risk FORGE_SNAPSHOT_EMIT=false forge test` | 0 | 653 passed, 0 failed |
+| `FOUNDRY_PROFILE=ci FORGE_SNAPSHOT_CHECK=true forge test --mc BookGasTest` | 0 | 8 passed (book snapshot unchanged) |
+| `bash scripts/check-gate.sh G0`…`G6` | 0 each | checks_passed (68/152/117/78/74/62/55) |
+| `bash scripts/check-gate.sh G7` | 2 | stops at A043: review fingerprints are out of date after B-D02/A-I01. They need the teammate's review refresh, not a merge fix |
+| Python A / B / audit / integration | 0 | OK |
+| `FOUNDRY_PROFILE=ci forge test -vvv` (the CI test step, 10k fuzz runs, 256×128 invariants) | 0 | 653 passed, 0 failed |
+
+Gate artifacts written on the scratch branch were discarded. They are not evidence for any
+accepted SHA.
+
+## What the real merge needs (human-requested only)
+
+1. The teammate reviews B-D02 and A-I01 and refreshes the A043 fingerprints on `integration/risk`.
+   G7 checks then pass again.
+2. A human asks for the merge. Then:
+   - repeat the steps above on the then-current heads;
+   - rerun the formatter, all gates and the CI steps;
+   - refresh fingerprints again, because the formatter changes `contracts/src` files;
+   - record G7 acceptance (human only).
+3. **UNVERIFIED:** main's `foundry.toml` comment says Monad's code-size limit is 128 KiB "(spec
+   §11.1)". `docs/spec/risk_spec.md` has no such section and does not mention a Monad size limit.
+   A human should confirm the target chain's limit before it is treated as the production limit.
+   If 131,072 B is right, `CombinedEngine` (112,924 B, with the mock book) fits with 18,148 B to
+   spare. The production composition with the real book is not built yet.
