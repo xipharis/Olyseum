@@ -22,7 +22,7 @@ and 1x, so empty and unavailable states are first-class. No rounded corners. Bra
 
 ## Direction contract
 
-THESIS: The terminal is the Osyleum mark at working scale: price as stacked flat bars, the mark price
+THESIS: The terminal is the Olyseum mark at working scale: price as stacked flat bars, the mark price
 as the one Signal bar. Refuses the default DeFi skin of rounded glowing cards on navy.
 
 OWN-WORLD: (Re-skinned 2026-10-05 under the user-pinned v0 brutalist theme; see PRODUCT.md.) Ivory

@@ -166,7 +166,7 @@ restore/continuation and reviewed production custody remain unverified.
 | Condition | Operator action |
 |---|---|
 | Source silence/stale timestamps | Check collection and provider status; preserve repeated clocks/gaps. Faster polling cannot refresh an old vendor timestamp. |
-| Source closure or changed rules | Preserve quarantine and mapping evidence; involve listing/oracle owners. Do not invent a final price or change Osyleum T. |
+| Source closure or changed rules | Preserve quarantine and mapping evidence; involve listing/oracle owners. Do not invent a final price or change Olyseum T. |
 | Receipt silence, UNKNOWN/ORPHANED or reserved nonce | Preserve all five journals. Use the existing canonical receipt/history recovery path. A timeout is not proof of non-delivery. |
 | Budget exhausted/low | Review counts, reservation ceilings and actual fees. Use the explicit audited budget plan; monitoring never renews authority. |
 | Key missing/unlock/identity failure | Stop publication; inspect custody and known public identities. Restore the same reviewed role, never silently generate or rotate it. |

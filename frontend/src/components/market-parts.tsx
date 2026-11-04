@@ -164,7 +164,7 @@ export function MarketInfo({ manifest, m }: { manifest: MarketManifest; m?: Mark
         <dl>
           <Row k="Trading closes" v={fmtUtc(l.scheduledT)} />
           <Row k="Trading phase" v={STAGE[m.risk.stage]} />
-          <Row k="Resolution" v={manifest.resolution === "ORACLE" ? "Osyleum oracle" : "Manual test authority"} />
+          <Row k="Resolution" v={manifest.resolution === "ORACLE" ? "Olyseum oracle" : "Manual test authority"} />
           <Row k="Maximum resolution wait" v={`${l.invalidRule.voidSecs / 86400n} days`} hint="Upper bound before an unresolved market voids to INVALID; collateral can remain locked until settlement." />
         </dl>
         <dl>

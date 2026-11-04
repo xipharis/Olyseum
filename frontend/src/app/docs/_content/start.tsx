@@ -7,15 +7,15 @@ export const introduction: DocGroup = {
     {
       slug: "",
       title: "Overview",
-      summary: "Osyleum is a protocol for leveraged long and short exposure to real-world event outcomes, built on a fully on-chain order book on Monad.",
+      summary: "Olyseum is a protocol for leveraged long and short exposure to real-world event outcomes, built on a fully on-chain order book on Monad.",
       sections: [
         { id: "introduction", title: "Introduction", body: <>
-          <p>Each Osyleum market is a binary question with a scheduled resolution time, for example &ldquo;Will the Golden State Warriors beat the Miami Heat on 5 November 2026?&rdquo; The YES price trades between 0 and 1 and represents the market&apos;s implied probability of the event.</p>
+          <p>Each Olyseum market is a binary question with a scheduled resolution time, for example &ldquo;Will the Golden State Warriors beat the Miami Heat on 5 November 2026?&rdquo; The YES price trades between 0 and 1 and represents the market&apos;s implied probability of the event.</p>
           <p>Traders take a <strong>long</strong> position to gain from a rising YES price or a <strong>short</strong> position to gain from a falling one. A position can be closed at any time before the market halts, or held to resolution and settled against the actual outcome. Eligible markets support leverage of up to 5×.</p>
           <p>Order matching, margin checks, the reserve that backs leverage, and settlement are all executed by contracts on Monad.</p>
         </> },
         { id: "design", title: "Design principles", body: <>
-          <p>A YES claim pays 1 if the event occurs and 0 if it does not. At resolution, its price does not converge gradually: it moves to 0 or 1 in a single block. A leveraged position on the losing side cannot be liquidated in time, so its loss cannot be recovered from the trader. Osyleum addresses this with two rules:</p>
+          <p>A YES claim pays 1 if the event occurs and 0 if it does not. At resolution, its price does not converge gradually: it moves to 0 or 1 in a single block. A leveraged position on the losing side cannot be liquidated in time, so its loss cannot be recovered from the trader. Olyseum addresses this with two rules:</p>
           <ol>
             <li><strong>Leverage is unwound before resolution.</strong> From T − 12h 30m, every account must return to full backing on a fixed schedule.</li>
             <li><strong>Residual losses are covered by a pre-funded reserve.</strong> The contracts continuously verify that the reserve can meet all deficits under both a YES and a NO outcome.</li>
@@ -27,11 +27,11 @@ export const introduction: DocGroup = {
             ["", "Event perpetual", "Spot (Kuru)"],
             ["Instrument", "Long or short position on the YES price", "YES and NO outcome tokens"],
             ["Leverage", "Up to the market's cap (maximum 5×)", "None"],
-            ["Venue", "Osyleum on-chain order book", "Kuru order books on Monad"],
-            ["Price reference", "External index (Polymarket or a Kuru book) and the Osyleum book", "Kuru book prices"],
+            ["Venue", "Olyseum on-chain order book", "Kuru order books on Monad"],
+            ["Price reference", "External index (Polymarket or a Kuru book) and the Olyseum book", "Kuru book prices"],
             ["Settlement", "Claim from the market engine", "Redeem winning tokens through the vault"],
           ]} />
-          <p>Native events can list both. The terminal provides a venue selector: <strong>Perp on Osyleum (long / short)</strong> or <strong>YES/NO tokens on Kuru (spot)</strong>.</p>
+          <p>Native events can list both. The terminal provides a venue selector: <strong>Perp on Olyseum (long / short)</strong> or <strong>YES/NO tokens on Kuru (spot)</strong>.</p>
         </> },
         { id: "architecture", title: "Architecture", body: <Table rows={[
           ["Component", "Responsibility"],
@@ -44,11 +44,11 @@ export const introduction: DocGroup = {
           ["Trading app", "Market discovery, wallet connection, trading and account management"],
         ]} /> },
         { id: "testnet", title: "Network status", body: <>
-          <p>Osyleum is deployed on Monad testnet (chain ID 10143). The current deployment has the following properties:</p>
+          <p>Olyseum is deployed on Monad testnet (chain ID 10143). The current deployment has the following properties:</p>
           <ul>
             <li>Collateral is <strong>tUSDC</strong>, a test token with no monetary value.</li>
             <li>Risk parameters use a synthetic calibration.</li>
-            <li>Resolution layer 1 runs on a single simulation node rather than a Chainlink DON. Disputes are decided by the Osyleum team through a sandbox oracle rather than by UMA voters.</li>
+            <li>Resolution layer 1 runs on a single simulation node rather than a Chainlink DON. Disputes are decided by the Olyseum team through a sandbox oracle rather than by UMA voters.</li>
             <li>Testnet state may be reset, and markets may be archived.</li>
           </ul>
         </> },
@@ -65,10 +65,10 @@ export const introduction: DocGroup = {
     {
       slug: "event-perps",
       title: "Event perpetuals",
-      summary: "The instrument traded on Osyleum: claims, prices, position direction and settlement.",
+      summary: "The instrument traded on Olyseum: claims, prices, position direction and settlement.",
       sections: [
         { id: "claims", title: "Claims", body: <>
-          <p>All exposure on Osyleum is denominated in <strong>claims</strong>. A claim pays <strong>1 tUSDC on YES</strong> and <strong>0 on NO</strong>. If a market resolves INVALID, a claim pays a captured price between 0 and 1 (see <Link href="/docs/settlement">Settlement and claims</Link>).</p>
+          <p>All exposure on Olyseum is denominated in <strong>claims</strong>. A claim pays <strong>1 tUSDC on YES</strong> and <strong>0 on NO</strong>. If a market resolves INVALID, a claim pays a captured price between 0 and 1 (see <Link href="/docs/settlement">Settlement and claims</Link>).</p>
           <p>Because a claim pays at most 1, its price is bounded between 0 and 1 and can be read as an implied probability. Prices are quoted in increments of 0.001, from 0.001 to 0.999.</p>
         </> },
         { id: "direction", title: "Position direction", body: <>
@@ -91,7 +91,7 @@ export const introduction: DocGroup = {
           <p>A fully backed short of 100 claims at 0.40 requires 100 × (1 − 0.40) = 60 tUSDC, which is its maximum loss if the event occurs.</p>
         </> },
         { id: "perpetual", title: "Perpetual mechanics", body: <>
-          <p>A conventional perpetual future tracks an underlying price indefinitely, with periodic funding keeping it aligned with spot. Osyleum applies the same structure to events: the Osyleum book trades against an external reference price, the <strong>index</strong>, and on leveraged markets an hourly <Link href="/docs/funding">funding</Link> payment keeps the two aligned.</p>
+          <p>A conventional perpetual future tracks an underlying price indefinitely, with periodic funding keeping it aligned with spot. Olyseum applies the same structure to events: the Olyseum book trades against an external reference price, the <strong>index</strong>, and on leveraged markets an hourly <Link href="/docs/funding">funding</Link> payment keeps the two aligned.</p>
           <p>Unlike a conventional perpetual, an event perpetual has a scheduled end. It trades as a perpetual while the question is open, then unwinds leverage and settles on the observed outcome.</p>
         </> },
         { id: "time-decay", title: "Time to resolution", body: <>
@@ -126,7 +126,7 @@ export const gettingStarted: DocGroup = {
         </> },
         { id: "get-gas", title: "2. Obtain testnet MON", body: <>
           <p>Every transaction requires MON for gas. Copy the selected address from the wallet menu and request testnet MON from the <a href="https://faucet.monad.xyz/" target="_blank" rel="noreferrer">Monad faucet</a>. The wallet menu displays the current gas balance.</p>
-          <Note>Mainnet MON cannot pay testnet gas. Send testnet MON to the address selected in Osyleum.</Note>
+          <Note>Mainnet MON cannot pay testnet gas. Send testnet MON to the address selected in Olyseum.</Note>
         </> },
         { id: "get-tusdc", title: "3. Obtain test collateral", body: <p>Mint 1,000 tUSDC from the Start page, or 1,000 or 10,000 tUSDC from the <strong>tUSDC faucet</strong> in the wallet menu. Minting is a transaction and requires gas.</p> },
         { id: "trade", title: "4. Place an order", body: <>
@@ -161,8 +161,8 @@ export const gettingStarted: DocGroup = {
           <p>Balances, positions and orders are scoped to the <strong>selected address</strong>. Creating or switching wallets does not transfer funds or positions.</p>
           <Note tone="warn">Changing the wallet, network or login session during a multi-step sequence (for example approve, deposit, allocate) cancels the remaining steps. A transaction that was already submitted can still execute; verify balances and the explorer before retrying.</Note>
         </> },
-        { id: "network", title: "Network", body: <p>Osyleum operates on Monad testnet (chain ID 10143) only. When the wallet is connected to another network, actions display <strong>Switch to Monad testnet</strong>, and the wallet menu can switch networks.</p> },
-        { id: "export", title: "Wallet export", body: <p>An embedded wallet can be exported with <strong>Export Privy wallet</strong> in the wallet menu. The private key is displayed in Privy&apos;s secure interface for import into another wallet. Do not share the key with any person or website, including the Osyleum team.</p> },
+        { id: "network", title: "Network", body: <p>Olyseum operates on Monad testnet (chain ID 10143) only. When the wallet is connected to another network, actions display <strong>Switch to Monad testnet</strong>, and the wallet menu can switch networks.</p> },
+        { id: "export", title: "Wallet export", body: <p>An embedded wallet can be exported with <strong>Export Privy wallet</strong> in the wallet menu. The private key is displayed in Privy&apos;s secure interface for import into another wallet. Do not share the key with any person or website, including the Olyseum team.</p> },
         { id: "instant-trading", title: "Instant trading", body: <>
           <p>With an embedded wallet, <strong>Instant trading</strong> is enabled by default. Allowlisted calls are signed in the browser without Privy&apos;s confirmation screen:</p>
           <Table rows={[

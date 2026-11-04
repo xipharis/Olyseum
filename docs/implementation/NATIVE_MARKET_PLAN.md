@@ -1,4 +1,4 @@
-# Osyleum native market: architecture and hackathon delivery plan
+# Olyseum native market: architecture and hackathon delivery plan
 
 Planning date: 2026-10-13. Repository baseline: `feat/pricefeed` at `df8b01cddc8c66ef636fb83403a0df1893d8fc66`.
 
@@ -31,9 +31,9 @@ flowchart TD
     Publisher --> Ingress[Engine PriceIngress.submitObservation]
     Ingress --> Index[INDEX checkpoints and complete-window TWAP]
 
-    Wallet[Trader / funded Osyleum maker] --> Vault
+    Wallet[Trader / funded Olyseum maker] --> Vault
     Vault --> Ledger[Engine isolated account ledger]
-    Wallet --> Book[Osyleum perpetual CLOB]
+    Wallet --> Book[Olyseum perpetual CLOB]
     Book <--> Risk[Admission / margin / reserve coverage]
     Risk <--> Ledger
     Index --> Sampler[samplePerp: capture then seal funded book depth]
@@ -78,7 +78,7 @@ flowchart TD
 2. [DurablePipeline](../../packages/pricefeed/src/durable-pipeline.ts), [publication.ts](../../packages/pricefeed/src/publication.ts), [PacketStore](../../packages/pricefeed/src/packet-store.ts), and [DurableObservationSigner](../../packages/pricefeed/src/durable-observation-signer.ts) persist preparation, sequence reservation, signing, relay, and receipt state. The pipeline currently parses Polymarket-specific config/rules; replacing only the HTTP fetcher is insufficient.
 3. [PriceIngress._ingest](../../contracts/src/pricing/PriceIngress.sol) checks market, configured source, rules hash, signer, strictly increasing sequence, nondecreasing source time, and `observedAt <= publishedAt <= block.timestamp`. The raw signed digest binds the chain and engine. It recomputes depth validity and the midpoint from the signed summary. It does **not** independently fetch the venue or prove that reported depth exists. Delayed data retains its original observation time.
 4. [ObservationStore](../../contracts/src/pricing/ObservationStore.sol), `_append`, `_windowTwap`, and `_recordPerp`, keeps three 1,024-checkpoint rings with cumulative time integrals. Availability requires complete coverage of the requested window. A same-second observation replaces the checkpoint without adding elapsed weight. An invalid checkpoint contributes no coverage.
-5. [BookRiskEngine.samplePerp](../../contracts/src/engine/BookRiskEngine.sol) captures eligible Osyleum perp depth, then seals it on a later block only if its book/account/epoch/risk/index commitments remain consistent. A valid pending capture also needs a source observation strictly newer than the capture. [BookDepthSampler.sol](../../contracts/src/pricing/BookDepthSampler.sol) supplies the book scan; `_depthOrderEligibility` counts fully backed eligible orders. A single keeper call or an arbitrary last trade is insufficient.
+5. [BookRiskEngine.samplePerp](../../contracts/src/engine/BookRiskEngine.sol) captures eligible Olyseum perp depth, then seals it on a later block only if its book/account/epoch/risk/index commitments remain consistent. A valid pending capture also needs a source observation strictly newer than the capture. [BookDepthSampler.sol](../../contracts/src/pricing/BookDepthSampler.sol) supplies the book scan; `_depthOrderEligibility` counts fully backed eligible orders. A single keeper call or an arbitrary last trade is insufficient.
 6. At sample time, `BASIS = perp impact midpoint − contemporaneous INDEX point`. [RiskPricing._markInputs](../../contracts/src/pricing/RiskPricing.sol) reads INDEX TWAP, BASIS TWAP, PERP TWAP, and the latest fresh recorded PERP observation. That last candidate is not an unsampled book quote.
 7. [PricingMath.mark](../../contracts/src/math/PricingMath.sol) computes `median(INDEX + BASIS_TWAP, PERP_TWAP, latest_PERP)` and clamps it to `[INDEX − b(t), INDEX + b(t)]` and `[0,1]`, where `b(t) = 0.05 × max(T−t,0)/(T−listedAt)`. All candidates must be available. `RiskPricing` exposes a normal MARK only in `NORMAL_PRICING`.
 
@@ -133,7 +133,7 @@ No tracked Kuru integration or native outcome-token/vault implementation was fou
 
 Start with a 1× native-priced perp and test collateral. Native leverage above 1× is a separate stretch milestone with liquidity, calibration, reserve, and price-independence evidence. Periodic funding remains disabled. This still demonstrates issuance, user spot execution, observable spot prices, native INDEX/MARK, perp trading, and coordinated settlement.
 
-**ASSUMPTIONS:** Monad testnet `10143`, one event, one six-decimal collateral token matching the chosen Osyleum vault, a few funded demo accounts, and a single operator host. No deadline or team size was provided; estimates below are engineering effort, not a promised calendar date.
+**ASSUMPTIONS:** Monad testnet `10143`, one event, one six-decimal collateral token matching the chosen Olyseum vault, a few funded demo accounts, and a single operator host. No deadline or team size was provided; estimates below are engineering effort, not a promised calendar date.
 
 ```mermaid
 flowchart TD
@@ -149,7 +149,7 @@ flowchart TD
     Native --> Select
     Select --> Publish[Shared durable observation publication]
     Publish --> Index[Existing PriceIngress and INDEX]
-    Index --> Perps[Existing MARK / margin / Osyleum perp CLOB]
+    Index --> Perps[Existing MARK / margin / Olyseum perp CLOB]
     PerpMaker[Separate funded perp maker] --> Perps
 
     Oracle[Existing ResolutionOracle + UMA sandbox] --> Final[Engine finality and settlement price]
@@ -159,17 +159,17 @@ flowchart TD
     Outcome --> Redeem
 ```
 
-There is no native-spot-price dependency on Osyleum MARK or the Osyleum perp book. Perp makers may reference native INDEX; the native maker must not reference that perp's MARK/INDEX to create its own source price.
+There is no native-spot-price dependency on Olyseum MARK or the Olyseum perp book. Perp makers may reference native INDEX; the native maker must not reference that perp's MARK/INDEX to create its own source price.
 
 ### 2.1 Alternatives and weighted decision matrix
 
 Scores are **design judgments**, 1 = poor and 5 = strong. Weighted total is `Σ(weight × score)/100`. Feasibility and integration time account for 45%; scores assume each venue passes its initial compatibility gate.
 
-| Criterion | Weight | A: ERC-20s + Kuru | B: ERC-20s + existing constant-product AMM implementation | C: Conditional Tokens + existing prediction AMM | D: Extend Osyleum into a spot CLOB |
+| Criterion | Weight | A: ERC-20s + Kuru | B: ERC-20s + existing constant-product AMM implementation | C: Conditional Tokens + existing prediction AMM | D: Extend Olyseum into a spot CLOB |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Delivery speed / amount of new code | 30 | 4 | 3 | 3 | 1 |
 | Integration difficulty / time uncertainty | 15 | 3 | 3 | 2 | 1 |
-| Reuse of current Osyleum code | 15 | 5 | 5 | 4 | 3 |
+| Reuse of current Olyseum code | 15 | 5 | 5 | 4 | 3 |
 | Demo quality | 15 | 5 | 4 | 4 | 4 |
 | Accounting/security simplicity | 15 | 3 | 3 | 4 | 2 |
 | External service independence | 5 | 2 | 4 | 4 | 5 |
@@ -178,10 +178,10 @@ Scores are **design judgments**, 1 = poor and 5 = strong. Weighted total is `Σ(
 
 - **A — recommended:** new issuance/redemption contracts and Kuru integration; high reuse of the price/risk pipeline. Dependencies are Kuru deployment compatibility, gas, collateral and makers. Best fit to the desired demo if the first gate passes.
 - **B — contingency:** keep the same outcome vault/tokens and use a pinned, understood ERC-20 constant-product pool implementation. Integration replaces Kuru book reads with executable buy/sell quotes at depth N. Risks include reserve-ratio manipulation, thin liquidity, LP withdrawal, fees and a new deployment review. This is an alternative workstream, not a one-hour fallback or a second venue to build in parallel. A usable Monad deployment has not been verified in this review.
-- **C — credible if Kuru is dropped:** reuse Conditional Tokens and its prediction-market AMM ecosystem. Less custom token accounting, but introduces ERC-1155 IDs, oracle payout reporting, older dependency/toolchain integration, and wrappers if Kuru is later required. Gnosis publishes [Conditional Tokens AMM contracts](https://github.com/gnosis/conditional-tokens-market-makers); availability of source is not validation of an Osyleum deployment.
-- **D — reject for this hackathon:** Osyleum has a derivative CLOB whose hooks operate on isolated cash/position ledgers. Turning it into escrowed transferable-outcome spot trading requires custody, matching, withdrawals, and new invariants. Reusing matching code would not make that conversion small.
+- **C — credible if Kuru is dropped:** reuse Conditional Tokens and its prediction-market AMM ecosystem. Less custom token accounting, but introduces ERC-1155 IDs, oracle payout reporting, older dependency/toolchain integration, and wrappers if Kuru is later required. Gnosis publishes [Conditional Tokens AMM contracts](https://github.com/gnosis/conditional-tokens-market-makers); availability of source is not validation of an Olyseum deployment.
+- **D — reject for this hackathon:** Olyseum has a derivative CLOB whose hooks operate on isolated cash/position ledgers. Turning it into escrowed transferable-outcome spot trading requires custody, matching, withdrawals, and new invariants. Reusing matching code would not make that conversion small.
 
-Kuru already combines book execution with AMM liquidity; a separate Osyleum matching/AMM hybrid is unnecessary. A permissioned fixed-price RFQ could demonstrate token transfer, but would not satisfy the intended native price-discovery demo.
+Kuru already combines book execution with AMM liquidity; a separate Olyseum matching/AMM hybrid is unnecessary. A permissioned fixed-price RFQ could demonstrate token transfer, but would not satisfy the intended native price-discovery demo.
 
 ### 2.2 Smallest useful abstraction boundary
 
@@ -190,7 +190,7 @@ Kuru already combines book execution with AMM liquidity; a separate Osyleum matc
 | `PriceSource` | Existing on-chain `IPriceSource.Observation` | Reuse unchanged. |
 | `ObservationSource` | Collection/publication types embed Polymarket | Add a small off-chain discriminated source policy for `polymarket` and `kuru-native`; both produce the same normalized book summary and observation envelope. |
 | `MarketAdapter` | External identity mapping is already explicit | Add a typed native binding record; no general plugin framework. |
-| `ExecutionVenue` | Existing execution is Osyleum perp trading | Add a concrete Kuru spot client with its own balances/order IDs. Do not route spot calls into perp transaction builders. |
+| `ExecutionVenue` | Existing execution is Olyseum perp trading | Add a concrete Kuru spot client with its own balances/order IDs. Do not route spot calls into perp transaction builders. |
 | `SourceRegistry` | Source signer/rules pinned in engine listing | Use a verified manifest plus listing fields. No new on-chain source registry. |
 | `PriceRouter` | One selected INDEX source per engine | No router, aggregation, or automatic fallback in MVP. |
 | `ResolutionProvider` | `ResolutionOracle` plus `IAssertionVenue` already exists | Reuse. The outcome vault reads final engine state; no second adjudicator. |
@@ -211,7 +211,7 @@ Preserve the existing development-network restrictions: `config.validateOperatio
 
 **VERIFIED FACT — documentation:** Gnosis Conditional Tokens provides condition preparation, split/merge, and payout-vector redemption. Its condition/question/position identifiers differ. See the [developer guide](https://conditional-tokens.readthedocs.io/en/latest/developer-guide.html). **DESIGN RECOMMENDATION:** adopt the complete-set accounting principle without importing the generalized condition tree into this MVP.
 
-**VERIFIED FACT — documentation:** current Polymarket documentation distinguishes CTF and Protocol V2 position systems, both using ERC-1155 balances. Signed CLOB orders settle on Polygon. Therefore “Polymarket always means the old USDC/CTF stack” is not a safe new assumption. See [positions](https://docs.polymarket.com/trading/positions/how-positions-work) and [trading](https://docs.polymarket.com/trading/overview). Keep Osyleum's existing external mapping checks strict; separately flag provider schema drift rather than treating native development as a Polymarket migration.
+**VERIFIED FACT — documentation:** current Polymarket documentation distinguishes CTF and Protocol V2 position systems, both using ERC-1155 balances. Signed CLOB orders settle on Polygon. Therefore “Polymarket always means the old USDC/CTF stack” is not a safe new assumption. See [positions](https://docs.polymarket.com/trading/positions/how-positions-work) and [trading](https://docs.polymarket.com/trading/overview). Keep Olyseum's existing external mapping checks strict; separately flag provider schema drift rather than treating native development as a Polymarket migration.
 
 ### 3.2 Contracts to add
 
@@ -251,13 +251,13 @@ Use checks/effects/interactions and a reentrancy guard. Direct transfers, failed
 
 ### 4.1 What is verified and what still needs proving
 
-**VERIFIED FACT — documentation:** Kuru documents router-based creation for existing token pairs, including ERC-20/ERC-20 (`NO_NATIVE`, currently type 0). Its token-launch deployer pairs with MON and is inappropriate for collateral-backed outcome issuance. Use the router route with Osyleum-created tokens. See [market deployment](https://docs.kuru.io/sdk/deploy-market) and [Router](https://docs.kuru.io/contracts/Router).
+**VERIFIED FACT — documentation:** Kuru documents router-based creation for existing token pairs, including ERC-20/ERC-20 (`NO_NATIVE`, currently type 0). Its token-launch deployer pairs with MON and is inappropriate for collateral-backed outcome issuance. Use the router route with Olyseum-created tokens. See [market deployment](https://docs.kuru.io/sdk/deploy-market) and [Router](https://docs.kuru.io/contracts/Router).
 
 **VERIFIED FACT — documentation:** Kuru exposes market parameters, best bid/ask, encoded L2 depth, limit orders, market orders, and cancellation. Its market book can include AMM liquidity. See [OrderBook](https://docs.kuru.io/contracts/OrderBook). The SDK supports margin deposits, order submission and cancellation; its examples are not a substitute for integer-safe transaction construction. See [Order Book SDK](https://docs.kuru.io/sdk/orderbook-sdk).
 
-Kuru's [address page](https://docs.kuru.io/contracts/Contract-addresses) currently lists testnet router `0x7EFbE105Ca7415dE98F96622173458ac1c054630`, margin account `0xd029C2D98ff85D8F64799017fE00a59B1159CE02`, and USDC `0x3bA3d39AFcf8bb994f7964B3e0171Ea2Ba361570`. These are documentation candidates, not RPC-verified addresses. Osyleum's selected frontend manifest uses TestUSDC `0x82C7236A14B635AFB6dC825115570aFE4C23c1DB`. They are different assets.
+Kuru's [address page](https://docs.kuru.io/contracts/Contract-addresses) currently lists testnet router `0x7EFbE105Ca7415dE98F96622173458ac1c054630`, margin account `0xd029C2D98ff85D8F64799017fE00a59B1159CE02`, and USDC `0x3bA3d39AFcf8bb994f7964B3e0171Ea2Ba361570`. These are documentation candidates, not RPC-verified addresses. Olyseum's selected frontend manifest uses TestUSDC `0x82C7236A14B635AFB6dC825115570aFE4C23c1DB`. They are different assets.
 
-**DESIGN RECOMMENDATION:** quote both outcome books in the same test collateral as the selected Osyleum deployment. **ASSUMPTION to prove at Gate 0:** the target Kuru router accepts that ERC-20 and the chosen six-decimal outcome tokens. If not, a new consistently collateralized stack or a different venue is required; relabeling the tokens “USDC” is insufficient.
+**DESIGN RECOMMENDATION:** quote both outcome books in the same test collateral as the selected Olyseum deployment. **ASSUMPTION to prove at Gate 0:** the target Kuru router accepts that ERC-20 and the chosen six-decimal outcome tokens. If not, a new consistently collateralized stack or a different venue is required; relabeling the tokens “USDC” is insufficient.
 
 For market/trade discovery, Kuru documents router `MarketRegistered` and book `Trade` events. [Integration guide](https://docs.kuru.io/contracts/Integration). Official SDKs also describe API/WebSocket book feeds and on-chain order events. [Kuru market-making guide](https://github.com/Kuru-Labs/kuru-sdk-py/blob/main/docs/MARKET_MAKING.md). New arbitrary-token testnet markets may not be indexed by hosted services. Use direct RPC as the required read path; hosted APIs are optional acceleration.
 
@@ -265,11 +265,11 @@ For market/trade discovery, Kuru documents router `MarketRegistered` and book `T
 
 ### 4.2 Liquidity design
 
-**MUST BUILD NOW:** one funded spot maker with bounded inventory, order size, quote range, gas budget, cancel/replace, and shutdown behavior. Inventory consists of YES/NO obtained by splitting and additional quote collateral for bids. Locked outcome backing must never fund maker bids or perp reserves. Existing Osyleum makers remain responsible for perp liquidity.
+**MUST BUILD NOW:** one funded spot maker with bounded inventory, order size, quote range, gas budget, cancel/replace, and shutdown behavior. Inventory consists of YES/NO obtained by splitting and additional quote collateral for bids. Locked outcome backing must never fund maker bids or perp reserves. Existing Olyseum makers remain responsible for perp liquidity.
 
 Begin with ordinary Kuru limit orders on both books. Do not require Kuru AMM vault deposits, flip orders, sophisticated inventory models, EIP-7702 delegation, or arbitrage automation. Confirm which liquidity `getL2Book` includes; count only liquidity whose price/quantity decoding and execution behavior the spike verifies. If AMM depth is omitted from the native source, disclose that and never count it a second time.
 
-A Kuru market existing on-chain does not guarantee a single order or a usable INDEX. Readiness requires enough executable size on both sides at the configured depth. A suggested controlled fixture is N = 100 claims = 100,000 Osyleum lots, with at least 2N on each side and spread no greater than 0.05. These are initial test parameters, not measured manipulation resistance. Because the engine shares a depth rule for INDEX and PERP, independently fund enough Osyleum perp depth and leave OI headroom for that N.
+A Kuru market existing on-chain does not guarantee a single order or a usable INDEX. Readiness requires enough executable size on both sides at the configured depth. A suggested controlled fixture is N = 100 claims = 100,000 Olyseum lots, with at least 2N on each side and spread no greater than 0.05. These are initial test parameters, not measured manipulation resistance. Because the engine shares a depth rule for INDEX and PERP, independently fund enough Olyseum perp depth and leave OI headroom for that N.
 
 ### 4.3 Complete-set arbitrage
 
@@ -284,7 +284,7 @@ Traders, independent market makers, or the demo operator can perform these trans
 
 ### 4.4 Trading halt and redemption from Kuru custody
 
-Osyleum cannot assume it has authority to pause a third-party Kuru book. At event halt, stop native observation publication for trading purposes, disable new spot orders in the Osyleum UI, and cancel the team's resting orders. Preserve cancellation, venue withdrawal, token transfer, merge where permitted, and redemption. Plain ERC-20 tokens can continue trading elsewhere, including after resolution; this does not change payout truth. Show the halt/resolution state prominently and never imply a protocol-wide Kuru trading halt.
+Olyseum cannot assume it has authority to pause a third-party Kuru book. At event halt, stop native observation publication for trading purposes, disable new spot orders in the Olyseum UI, and cancel the team's resting orders. Preserve cancellation, venue withdrawal, token transfer, merge where permitted, and redemption. Plain ERC-20 tokens can continue trading elsewhere, including after resolution; this does not change payout truth. Show the halt/resolution state prominently and never imply a protocol-wide Kuru trading halt.
 
 Retain all pre-halt observation evidence and continue the existing INVALID-capture/resolution jobs. Any permitted late delivery of authentic pre-T evidence keeps its original timestamp; post-T snapshots cannot fill a pre-T history gap.
 
@@ -323,7 +323,7 @@ Use a new domain such as `EROS_KURU_NATIVE_INDEX_RULES_V1`, distinct from `EROS_
 
 1. Read all market parameters and depth at the same confirmed/canonical block. Use supported finalized state where available; otherwise pin a documented confirmation depth and recheck its block hash. If the RPC cannot provide a consistent snapshot, do not sign.
 2. Take `observedAt` from that block's timestamp. A fresh read of unchanged on-chain resting orders at a later canonical block can be a new observation of currently executable liquidity; replaying a cached old response cannot. Retain last-trade time separately from book observation time.
-3. Check base/quote orientation, collateral identity, token decimals, live binding, market state, nonzero sizes, sorting, tick validity, and representable integer units. Convert six-decimal token atoms to the existing WAD quantity scale, and whole claims to 1,000 Osyleum lots each. Do not pass JavaScript floats into signed price arithmetic.
+3. Check base/quote orientation, collateral identity, token decimals, live binding, market state, nonzero sizes, sorting, tick validity, and representable integer units. Convert six-decimal token atoms to the existing WAD quantity scale, and whole claims to 1,000 Olyseum lots each. Do not pass JavaScript floats into signed price arithmetic.
 4. Require both sides to execute N, `0 < impactBid <= impactAsk < 1`, an uncrossed top of book, and spread within the pinned bound. Prices outside the probability domain invalidate the source; do not silently clamp bad spot prices into valid probabilities.
 5. Publish at most once per distinct source second and never reinterpret an old source time as new. A starting policy is collection every 5 s and publication every 15–20 s, subject to measured gas and existing service policy bounds. This is intentionally below both the default 30 s carry and testnet 120 s INDEX carry. Tune only after proving recovery and budgeting for it.
 6. Reuse packet leases, sequence reconciliation, raw signature verification, destination bytecode/listing checks, nonce and receipt journals. Signature presence authenticates the reporter; it does not prove honest depth.
@@ -351,7 +351,7 @@ For Polymarket 0.64 and native 0.61, a Polymarket-selected engine uses 0.64 obse
 
 Separate liquidity operations, observation, and truth determination:
 
-- The native maker receives an explicit initial quote/inventory budget and may use external event information or human quotes. It never derives native quotes from Osyleum perp MARK, BASIS, or the INDEX created from that same native book.
+- The native maker receives an explicit initial quote/inventory budget and may use external event information or human quotes. It never derives native quotes from Olyseum perp MARK, BASIS, or the INDEX created from that same native book.
 - A user trade changes actual venue balances/inventory. Team-to-team demo trades are labeled controlled activity and never counted as independent market participation. Separate wallet addresses or processes alone do not establish independence.
 - The observer reads actual executable book state and records known team participation/provenance. It has a dedicated signing key and no trading authority. Team-only book depth may be used in the **explicitly controlled, test-collateral, 1× native demonstration**, but is never described as an independent external oracle.
 - Native-only leveraged deployment is blocked while the team's quoting is the sole economic anchor. For a hackathon leverage demonstration before independent native liquidity exists, use the existing external-selected engine and show native spot alongside it. Do not claim that this is native-priced leverage.
@@ -378,7 +378,7 @@ For INVALID at 0.63, one YES redeems 0.63 and one NO 0.37, matching the perp set
 
 **VERIFIED FACT — documentation:** OOv3 supports assertion, challenge period, dispute and settlement/result consumption. [UMA quick start](https://docs.uma.xyz/developers/optimistic-oracle-v3/quick-start). UMA also documents a [sandbox environment](https://docs.uma.xyz/developers/optimistic-oracle-v3/sandboxed-oracle-environment). Its current [network list](https://docs.uma.xyz/resources/network-addresses) does not list Monad; this review therefore has no evidence of an officially supported Monad DVM integration.
 
-**VERIFIED FACT — repository:** Osyleum already has same-chain `UmaAdapter`, OOv3 deployment records, and [ErosSandboxOracle.sol](../../oracle/src/venues/ErosSandboxOracle.sol); the frontend manifest explicitly includes that sandbox. This is reusable functionality, not proof of decentralized live UMA adjudication on Monad.
+**VERIFIED FACT — repository:** Olyseum already has same-chain `UmaAdapter`, OOv3 deployment records, and [ErosSandboxOracle.sol](../../oracle/src/venues/ErosSandboxOracle.sol); the frontend manifest explicitly includes that sandbox. This is reusable functionality, not proof of decentralized live UMA adjudication on Monad.
 
 **Hackathon implementation — MUST BUILD NOW:** use the existing real assertion/bond/liveness/finalization flow with owner-controlled sandbox dispute adjudication clearly labeled. Prefer a no-feed/manual reviewed event route using the current committee console for the first slice, with the required existing registry/trust-set/category configuration. Do not require new AI panel or CRE integrations. Use mocks only in unit/local tests, not as substitutes for the public-demo transaction trail.
 
@@ -386,7 +386,7 @@ For INVALID at 0.63, one YES redeems 0.63 and one NO 0.37, matching the perp set
 
 ### 6.3 Reuse of the perpetual path
 
-Native observer → unchanged signed envelope → `PriceIngress` → complete INDEX window → existing sealed Osyleum book observations → BASIS/PERP → MARK → existing admission, margin, liquidation and settlement. **No core pricing/risk math change is required by this design.** New adapter integration tests must prove that conclusion against the actual engine.
+Native observer → unchanged signed envelope → `PriceIngress` → complete INDEX window → existing sealed Olyseum book observations → BASIS/PERP → MARK → existing admission, margin, liquidation and settlement. **No core pricing/risk math change is required by this design.** New adapter integration tests must prove that conclusion against the actual engine.
 
 The initial native engine uses `deploymentCapX=1`, `fundingEnabled=false`, `maxLiqLotsPerBlock=0`, and a small registry OI cap. Keep risk checks and reserve accounting intact. Any higher-cap stretch market needs a separate deliberate listing, nonzero measured liquidation capacity, reserve seed, valid calibration, eligible epoch activation, and the anti-circularity gate. Copying the old theory document's “native 3×” is not a calibration.
 
@@ -463,13 +463,13 @@ Every new filename below is proposed. Existing files are links. A phase is incom
 - **Demo milestone:** native trade/book state → signed observation receipt → available on-chain INDEX TWAP.
 - **Definition of done:** valid observations reproduce exact integer arithmetic and source timestamps; unavailable data creates no fake coverage; both native and unchanged Polymarket source suites pass. No `BookRiskEngine` change needed, or any discovered exception receives a scoped design review before widening the change.
 
-### Phase 4 — Open an Osyleum perp using native INDEX (1 day)
+### Phase 4 — Open an Olyseum perp using native INDEX (1 day)
 
-- **Owner/dependencies:** integration/risk owner; Phase 3, a funded existing Osyleum maker and keeper.
+- **Owner/dependencies:** integration/risk owner; Phase 3, a funded existing Olyseum maker and keeper.
 - **Add:** `oracle/test/integration/NativePriceLifecycle.t.sol`, `scripts/native-market/run.ts` with separate local/testnet modes and explicit manifests.
 - **Modify:** source selection/enrollment in [market-services.ts](../../scripts/e2e/market-services.ts), [keeper-observer.ts](../../scripts/e2e/keeper-observer.ts), and [market-supervisor.mjs](../../scripts/ops/market-supervisor.mjs) only where Polymarket-specific startup assumptions require it. Reuse existing sampling/activation/rollover behavior.
 - **Tests/mocks:** first run at local chain 31337 with authentic default windows and controlled clock advancement; separately exercise 10143-specific pricing using isolated test fixtures. Verify fresh INDEX → post-only warm-up → capture/newer INDEX/seal → complete PERP/BASIS → activation → real fill. Simulate source loss and a whole hourly rollover.
-- **Demo milestone:** a fully backed Osyleum long/short fill whose engine listing and accepted observations identify native Kuru as INDEX source.
+- **Demo milestone:** a fully backed Olyseum long/short fill whose engine listing and accepted observations identify native Kuru as INDEX source.
 - **Definition of done:** 1× position and collateral are correct; INDEX/MARK are available before the advertised trade; removing native liquidity fails safely; changing only perp orders never changes the native observer's venue data; recovery rewarms valid history. Native maker and perp maker remain distinct funded roles.
 
 ### Phase 5 — Resolve, redeem spot, and settle perps (1–1.5 days)
@@ -556,7 +556,7 @@ Do not build a new spot CLOB, a multi-source consensus network, generalized gove
 | Market identity/binding | Registry event plus verified native manifest | **MUST BUILD NOW** | Existing listing flow, permissionless validated one-time vault bind | Scalable native listing factory |
 | Kuru integration | YES/collateral and NO/collateral books | **MUST BUILD NOW**, after Gate 0 | Direct RPC, limit orders, receipt-backed balances | More venue/LP support and independent liquidity |
 | Native market maker | Fund both sides with explicit budgets | **MUST BUILD NOW** | One operator, bounded quotes/inventory | Independent competitive makers |
-| Perp market maker | Keep using existing funded Osyleum maker | **MUST BUILD NOW — REUSE** | Separate capital and orders | Stronger liquidity and liquidation depth |
+| Perp market maker | Keep using existing funded Olyseum maker | **MUST BUILD NOW — REUSE** | Separate capital and orders | Stronger liquidity and liquidation depth |
 | Split/merge arbitrage | Scripted demonstration with actual fills | **MUST BUILD NOW** | Manual bounded legs | Atomic/automated arbitrage — **NICE TO HAVE FOR HACKATHON** |
 | Native price observer | Canonical YES impact midpoint at N | **MUST BUILD NOW** | One trusted reporter, integer policy and durable journals | Independent observer diversity and attack-cost checks |
 | Source adapter boundary | Tagged Polymarket/native source policies | **MUST BUILD NOW** | Two concrete adapters, unchanged wire envelope | Additional sources as justified |

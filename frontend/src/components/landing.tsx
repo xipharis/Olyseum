@@ -44,7 +44,7 @@ const REASONS = [
 function Reasons() {
   return (
     <section className="mx-auto max-w-[1320px] px-4 pt-24 md:px-6">
-      <p className="eyebrow">Why Osyleum</p>
+      <p className="eyebrow">Why Olyseum</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
         <h2 className="display max-w-2xl text-[clamp(2rem,4vw,3rem)] leading-[1.05] text-fg">Three reasons to trade the question, not the noise.</h2>
         <PillLink href="/start">Get started</PillLink>
@@ -86,7 +86,7 @@ function HowItWorks() {
           </li>
         ))}
       </ol>
-      <p className="mt-4 text-xs text-fg-4">Testnet: collateral is a test token, layer-one resolution runs on a single simulation node and disputes go to an Osyleum-run UMA sandbox.</p>
+      <p className="mt-4 text-xs text-fg-4">Testnet: collateral is a test token, layer-one resolution runs on a single simulation node and disputes go to an Olyseum-run UMA sandbox.</p>
     </section>
   );
 }

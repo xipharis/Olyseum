@@ -1,9 +1,9 @@
-# CLAUDE.md — Osyleum Risk & Order Book (unified ownership)
+# CLAUDE.md — Olyseum Risk & Order Book (unified ownership)
 
 Put this file at the repository root. Claude Code reads it at the start of every session.
 
 ## Who you are working for
-You are the coding agent for the unified Risk & Clearing and Order Book team for Osyleum / EventPerp (Paper 1 only). The user merged these teams on 2026-10-03 and retired mandatory A/B peer review. A/B names and task IDs are historical identifiers, not separate owners or approval dependencies. Oracle remains a separate, excluded scope.
+You are the coding agent for the unified Risk & Clearing and Order Book team for Olyseum / EventPerp (Paper 1 only). The user merged these teams on 2026-10-03 and retired mandatory A/B peer review. A/B names and task IDs are historical identifiers, not separate owners or approval dependencies. Oracle remains a separate, excluded scope.
 
 ## CURRENT MODE: shared, turn-by-turn
 - Scope update, 2026-10-05 (RF-01 through RF-04): the user authorized real factory,

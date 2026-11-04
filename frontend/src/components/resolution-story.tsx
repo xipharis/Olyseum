@@ -100,7 +100,7 @@ export function ResolutionStory({ manifest, m }: { manifest: MarketManifest; m?:
       Anyone could dispute it for {fmtDuration(Number(assertion.args.liveness))}, until {time(expires!)}{expires! > now && !f.finalized ? " (open now)" : ""}.
       {f.disputes.length > 0 ? <> Disputed {f.disputes.length}×; the sandbox arbiter decided.</> : <> No dispute was raised.</>}
       {f.rejected.length > 0 && <> {f.rejected.length} proposal(s) were rejected and retried.</>}
-      <span className="block text-fg-3">Testnet: disputes go to an Osyleum-run UMA sandbox, not UMA voters.</span>
+      <span className="block text-fg-3">Testnet: disputes go to an Olyseum-run UMA sandbox, not UMA voters.</span>
     </> : <>Every proposal carries a bond and a dispute window before it can become final.</> });
   steps.push({ key: "final", title: f.finalized ? `Final: ${ORACLE_OUTCOME[Number(f.finalized.args.outcome)]}` : f.voided ? "Voided" : "Final outcome",
     status: f.finalized || f.voided ? "done" : "pending", at: f.finalized?.timestamp, tx: f.finalized?.txHash, body: f.finalized ? <>

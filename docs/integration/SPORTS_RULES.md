@@ -26,7 +26,7 @@ F1 requires a completed race **and** a complete, unique classification from the
 same race. CRE and watchdog fetch that second endpoint independently with the
 same server-side secret. The binding pins the complete expected driver roster.
 
-These are Osyleum rules. A Polymarket-linked market must separately be checked for
+These are Olyseum rules. A Polymarket-linked market must separately be checked for
 equivalent overtime, postponement, cancellation and split-payout treatment. A
 matching team name is insufficient. Index pricing and settlement sources remain
 independent; a market may instead explicitly follow Polymarket's finalized binary

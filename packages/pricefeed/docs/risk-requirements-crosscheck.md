@@ -11,7 +11,7 @@ review, not a new Solidity test run or production acceptance.
 | Q03 clocks | Unix seconds; observedAt <= publishedAt <= acceptance block time; observedAt nondecreasing; freshness uses observedAt | Vendor timestamp meaning; enforce selected packet freeze and pre-send policy in production pipeline |
 | Q04 hash | Listing indexRulesHash pinned to source state; signed sourceRulesHash must equal it | Canonical manifest and listing dossier; no missing risk hashing implementation |
 | Q05 units | Price WAD is USDC per claim; depths are lots; one lot = 0.001 claim | Provider quote equivalence, precision and executable-size normalization |
-| Q06 mapping | Osyleum market/source identity and immutable scheduledT are pinned | Exact Polymarket question/outcome/exception equivalence and closure handling; category labels do not establish equivalence |
+| Q06 mapping | Olyseum market/source identity and immutable scheduledT are pinned | Exact Polymarket question/outcome/exception equivalence and closure handling; category labels do not establish equivalence |
 | Q07 timing | 30-second carry; independent index TWAP requires full 300-second coverage | Poll/metadata/sign/relay budgets need measurements; 30 seconds is not an approved poll interval |
 | Q08 invalid depth | Authenticated, ordered packets with failed depth/spread validity are accepted with depthValid=false and emitted midpoint zero; invalid checkpoints supply no coverage | Producer field representation and delivery priority; unavailable/untrusted source time cannot be invented |
 | Q09 environment | Digest and signer interface fixed; sourceState and events support reconciliation | Actual chain/RPC/engine/key backend, finality, spend budget and send authority |

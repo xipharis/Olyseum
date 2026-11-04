@@ -10,11 +10,11 @@ This covers all **four tracks, 21 bounty entries and supporting resources** in t
 
 ## 1. Bottom line
 
-**We do not need to replace the Osyleum order book or risk engine to integrate most of these sponsors.** The best additions sit around the existing contracts: wallet access, a transaction client, indexed views, RPC infrastructure and the real resolution workflow.
+**We do not need to replace the Olyseum order book or risk engine to integrate most of these sponsors.** The best additions sit around the existing contracts: wallet access, a transaction client, indexed views, RPC infrastructure and the real resolution workflow.
 
 The strongest coherent first bundle is:
 
-> **Track 1 Osyleum trading + Envio + Chainlink CRE + Alchemy + one primary wallet provider**, followed by a MetaMask Agent Wallet client and meaningful Kimi-assisted evidence review if time permits.
+> **Track 1 Olyseum trading + Envio + Chainlink CRE + Alchemy + one primary wallet provider**, followed by a MetaMask Agent Wallet client and meaningful Kimi-assisted evidence review if time permits.
 
 - **Privy or Dynamic:** shorter route to a usable account/trading experience.
 - **Mera:** a more distinctive account layer, and necessary for the Agora/Mera account bounties, but recovery and session-security work make it harder.
@@ -66,7 +66,7 @@ Difficulty is an engineering judgment for a working, demonstrable feature, not j
 - **Very high:** new custody/economic semantics or a separate product.
 - **Access/eligibility blocked:** missing vendor access or organizer confirmation; more coding alone cannot resolve it.
 
-| Primary track | Fit for current Osyleum | What would make the submission credible |
+| Primary track | Fit for current Olyseum | What would make the submission credible |
 |---|---|---|
 | 1. Onchain Finance & Trading | **Strongest** | Real owner-funded trading, risk/account views, cancellation, settlement/claims and a usable product |
 | 2. Consumer Products & Payments | Separate scope | Actual recipient/payment experience; a trading deposit screen is not a payments product |
@@ -108,7 +108,7 @@ Confirm whether a single project may enter the relevant combinations. Assigned-t
 ```text
 Frontend/PWA or MetaMask agent client
   -> one selected account owner (EOA or deliberately supported smart account)
-  -> shared Osyleum transaction builder, preview, policy and receipt handling
+  -> shared Olyseum transaction builder, preview, policy and receipt handling
   -> existing CollateralVault + BookRiskEngine + ReserveVault
 
 Alchemy / existing QuickNode -> chain-pinned reads, simulation, send and monitoring
@@ -117,8 +117,8 @@ Independent INDEX publisher -> authenticated PriceIngress observations
 CRE + resolution services   -> ResolutionOracle -> real engine -> bounded clearing
 
 Optional, explicitly separate routes:
-Aurora -> user's destination wallet -> ordinary Osyleum deposit/allocation
-Agora  -> payment/settlement flow, not Osyleum cash ledger
+Aurora -> user's destination wallet -> ordinary Olyseum deposit/allocation
+Agora  -> payment/settlement flow, not Olyseum cash ledger
 Kuru   -> spot balances, market, orders and receipts
 Perpl  -> exchange account, collateral, orders, funding and liquidation model
 AI / Nansen -> advisory evidence or context, never unilateral custody/finality
@@ -126,9 +126,9 @@ AI / Nansen -> advisory evidence or context, never unilateral custody/finality
 
 ### Rules every integration must preserve
 
-1. **The onchain sender owns the account.** An authentication user ID is not an Osyleum trader. A shared backend/router calling `deposit`, `allocate` or `placeOrder` becomes the sender; it must not pretend those credits belong to an unrelated user. Use the actual user wallet or a user-owned, explicitly supported smart account.
+1. **The onchain sender owns the account.** An authentication user ID is not an Olyseum trader. A shared backend/router calling `deposit`, `allocate` or `placeOrder` becomes the sender; it must not pretend those credits belong to an unrelated user. Use the actual user wallet or a user-owned, explicitly supported smart account.
 2. **No generic `depositFor`, trusted-forwarder or meta-transaction patch is needed for the first wallet integrations.** If later required, it is a separate contract/security design, not a login feature.
-3. **Do not combine venue balances.** Osyleum, Perpl and Kuru have different custody, margin, units and withdrawal rules. Aggregated display is not cross-margining.
+3. **Do not combine venue balances.** Olyseum, Perpl and Kuru have different custody, margin, units and withdrawal rules. Aggregated display is not cross-margining.
 4. **Do not replace event INDEX with our own book price.** Book-derived PERP sampling and independent INDEX serve different purposes. A sponsor's generic token price or wallet labels are not automatically a valid binary-event feed.
 5. **Do not turn on unsupported economics for a demo.** Current concrete engine enforces the fully backed 1x initial profile; funding/recovery/conversion and ordinary leveraged liquidations are not demonstrated by this deployment.
 6. **Use exact integer units.** Collateral atoms have six decimals; Q is `10^18` per atom; one lot is `0.001` claim; ticks are `1..999`. Reuse `packages/risk-sdk` decoders and contract views, not vendor sample floating-point arithmetic for transaction amounts.
@@ -193,7 +193,7 @@ Paths under `contracts/` and `packages/risk-sdk/` exist on the risk branch. Path
 
 **Existing evidence:** previous read-only observation at testnet block **68,000,500** found oracle code matching its seven-contract manifest, but globals/trust set uninitialized, stub factory selected, simulation mode enabled with zero simulation forwarder and empty assertion/watchdog float ledgers. These are dated observations, not a fresh liveness assertion.
 
-**Done when:** real listing -> actual collateral -> activation -> authenticated INDEX -> Osyleum fills -> halt -> oracle finality -> bounded preparation -> direct owner claims works on the same integrated market. Preserve separate markets for the continuing demo and terminal tests. Oracle implementation work must be coordinated with its owner; this document does not authorize that work.
+**Done when:** real listing -> actual collateral -> activation -> authenticated INDEX -> Olyseum fills -> halt -> oracle finality -> bounded preparation -> direct owner claims works on the same integrated market. Preserve separate markets for the continuing demo and terminal tests. Oracle implementation work must be coordinated with its owner; this document does not authorize that work.
 
 ### SP-04: independent INDEX publisher and runtime operations
 
@@ -227,23 +227,23 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 - **Add/change:** no code. Verify the actual community/campus affiliation and that the event has onboarded that group; set the correct team profile field.
 - **Blocker:** real affiliation and portal eligibility are unknown. Do not invent a group membership.
-- **Completion evidence:** profile selection survives reload and the working Osyleum submission identifies the represented community. This does not compensate for missing product functionality.
+- **Completion evidence:** profile selection survives reload and the working Olyseum submission identifies the represented community. This does not compensate for missing product functionality.
 - **Source:** PDF p.12; administrative requirements need current portal confirmation.
 
 ### B02 - Agora cross-border payments
 
-- **Add/change:** NEW `packages/venue-adapters/src/agora-settlement.ts` and mobile recipient/send/status screens. Use Mera onboarding, AUSD balances, pair discovery, quote/minimum-output/deadline checks, approved recipients, whitelist handling and an idempotent receipt journal. Keep this outside Osyleum market cash.
+- **Add/change:** NEW `packages/venue-adapters/src/agora-settlement.ts` and mobile recipient/send/status screens. Use Mera onboarding, AUSD balances, pair discovery, quote/minimum-output/deadline checks, approved recipients, whitelist handling and an idempotent receipt journal. Keep this outside Olyseum market cash.
 - **Actual API boundary:** Instant Settlement uses a **factory and swap pairs**, not a generic remittance function. Discover the supported pair, quote with `getAmountsOut`, approve the correct spender and use the documented `swapExactTokensForTokens` call. Confirm the event's intended mock-payment flow; a swap receipt alone is not evidence of real cross-border fiat payout.
 - **Current technical update:** official deployments list Monad testnet AUSD `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` and Instant Settlement factory `0x8468587Af422ad440F58a57E955eCA6A970b5375`. The latter is **not the pair address**. Verify chain/code/ABI, pair liquidity and whitelist eligibility before implementation. [AUSD deployments](https://docs.agora.finance/developer/contract-deployments), [settlement deployments](https://docs.agora.finance/instant-settlement/protocol-deployments), [fixed-input swaps](https://docs.agora.finance/instant-settlement/guides/executing-swap/swapping-fixed-input).
-- **Main blockers:** separate consumer product, Mera recovery/security, pair access/liquidity, Track 2 eligibility. This is not achieved by renaming an Osyleum withdrawal button.
+- **Main blockers:** separate consumer product, Mera recovery/security, pair access/liquidity, Track 2 eligibility. This is not achieved by renaming an Olyseum withdrawal button.
 - **Done/demo:** correct recipient receives the documented testnet asset, expired/failed/duplicate requests are handled, and onboarding/balance/send/receive are shown. PDF p.13 requires feature text and a <=2-minute video.
 
 ### B03 - Agora mobile trading
 
-- **Add/change:** mobile/PWA Mera account flow, real AUSD wallet balance and a **Perpl** tab using the B12 adapter. Explicitly separate Osyleum and Perpl collateral/positions.
+- **Add/change:** mobile/PWA Mera account flow, real AUSD wallet balance and a **Perpl** tab using the B12 adapter. Explicitly separate Olyseum and Perpl collateral/positions.
 - **Token distinction:** official Perpl documentation uses AUSD on mainnet but a different testnet USD token, `0xdf5b718d8fcc173335185a2a1513ee8151e3c027`. Holding testnet AUSD does not automatically fund Perpl. [Perpl network/account documentation](https://raw.githubusercontent.com/PerplFoundation/api-docs/main/README.md).
-- **Main blockers:** actual Perpl onboarding/collateral, API enrollment access, mobile/passkey reconstruction, and confirmation of the permitted testnet demonstration. No Osyleum contract rewrite is required for this extra venue.
-- **Done/demo:** one app demonstrates **Mera authentication + AUSD balance + an actual Perpl trade**, with fill reconciliation and cancellation/error handling. AUSD display plus an Osyleum-only trade is insufficient. PDF p.14 requires explanation and <=2-minute video.
+- **Main blockers:** actual Perpl onboarding/collateral, API enrollment access, mobile/passkey reconstruction, and confirmation of the permitted testnet demonstration. No Olyseum contract rewrite is required for this extra venue.
+- **Done/demo:** one app demonstrates **Mera authentication + AUSD balance + an actual Perpl trade**, with fill reconciliation and cancellation/error handling. AUSD display plus an Olyseum-only trade is insufficient. PDF p.14 requires explanation and <=2-minute video.
 
 ### B04 - Envio
 
@@ -254,7 +254,7 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 ### B05 - Aurora Intents
 
-- **Add/change:** NEW `services/funding/src/aurora.ts`, a durable funding-intent table and source-chain/asset/recipient/refund/status UI. Query supported assets, request a quote, execute the user's approved route and reconcile final destination receipt before offering Osyleum allocation.
+- **Add/change:** NEW `services/funding/src/aurora.ts`, a durable funding-intent table and source-chain/asset/recipient/refund/status UI. Query supported assets, request a quote, execute the user's approved route and reconcile final destination receipt before offering Olyseum allocation.
 - **Boundary:** deliver to the **user's wallet**, then SP-01 approve/deposit/allocate. An ERC-20 transfer directly into our vault does not create `freeAtoms` credit. Current controller-minted fixture collateral is not automatically routable.
 - **Main blockers:** exact source/destination asset route, testnet availability, liquidity and app credentials. Monad is documented as a source/destination chain, but that does not prove the desired testnet route. [Supported chains](https://docs.intents.aurora.dev/intents-deposits/supported-chains), [API integration](https://docs.intents.aurora.dev/intents-deposits/quickstart/api-integration).
 - **Done/demo:** genuine completed cross-chain funding, expiry/refund/retry handling and subsequent owner-credited deposit. Pin the API reference rather than copying inconsistent sample snippets. PDF p.16 requires explanation; optional <=2-minute video. Do not claim a mock route as live.
@@ -262,22 +262,22 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 ### B06 - Cleanverse
 
 - **Add/change:** first obtain CVI/CVA specifications, ABI, supported deployments and sandbox access. Then design an isolated credential-aware asset/custody path covering identity, authorization, revocation, transfer/issuance/redemption and exit handling.
-- **Required boundary in the PDF:** **both CVI and CVA** are required, with onchain wallet-bound CVI verification before **every CVA transfer/settlement**. Wallet badges or frontend checks are insufficient: direct contract calls must respect the policy. Adding these rules to pooled Osyleum custody changes its invariants and needs specification, threat model, tests and a new deployment. Prefer a separately scoped product rather than patching the large engine for a prize.
+- **Required boundary in the PDF:** **both CVI and CVA** are required, with onchain wallet-bound CVI verification before **every CVA transfer/settlement**. Wallet badges or frontend checks are insufficient: direct contract calls must respect the policy. Adding these rules to pooled Olyseum custody changes its invariants and needs specification, threat model, tests and a new deployment. Prefer a separately scoped product rather than patching the large engine for a prize.
 - **Main blockers:** public documentation redirects to an invitation gate; exact interfaces are unverified. Define what happens to open positions and legitimate payouts when credentials expire/revoke before writing enforcement. Track 4/cross-track eligibility also needs confirmation. [Cleanverse documentation](https://docs.cleanverse.com/).
 - **Done/demo:** unauthorized direct calls fail, valid users complete the intended CVI/CVA flow, and revocation/unwind behavior is proved without accidental permanent lockup. PDF p.17 requires explanation and <=5-minute video.
 
 ### B07 - Kuru consumer trading
 
 - **Add/change:** NEW `packages/venue-adapters/src/kuru.ts`, a distinct spot trading screen and Kuru-specific order/balance index. Pin router/margin/market addresses and SDK; fetch market parameters; implement integer-precise quotes, slippage, supported deposits, IOC/GTC/cancel and reconciliation.
-- **Core impact:** no replacement of Osyleum matching or risk accounting. Kuru has its own spot market and margin-account mechanics. Official docs list separate mainnet/testnet deployments and `MarketRegistered`/`Trade` discovery/activity events. [Contract addresses](https://docs.kuru.io/contracts/Contract-addresses), [integration events](https://docs.kuru.io/contracts/Integration), [orderbook SDK](https://docs.kuru.io/sdk/orderbook-sdk).
+- **Core impact:** no replacement of Olyseum matching or risk accounting. Kuru has its own spot market and margin-account mechanics. Official docs list separate mainnet/testnet deployments and `MarketRegistered`/`Trade` discovery/activity events. [Contract addresses](https://docs.kuru.io/contracts/Contract-addresses), [integration events](https://docs.kuru.io/contracts/Integration), [orderbook SDK](https://docs.kuru.io/sdk/orderbook-sdk).
 - **Main blockers:** real liquidity, supported token pair, user need and actual Kuru execution. SDK example floating-point arithmetic must not become our transaction amount policy.
 - **Done/demo:** intended consumers can execute and cancel real Kuru trades with understandable costs; submit segment/demand evidence and onboarding/retention plan. PDF p.18 expects a consumer product, not merely an unused SDK or a hidden collateral swap.
 
 ### B08 - Kuru new assets
 
 - **Add/change:** only after a separate economic design, NEW `contracts/src/assets/OutcomeToken.sol`, `OutcomeVault.sol`, issuance/redemption tests and a Kuru market deployment/liquidity module. Proposed filenames describe our contracts, not Kuru APIs.
-- **Why difficult:** an Osyleum signed internal position is **not an ERC-20 spot asset**. A viable proposal is separately fully backed YES/NO issuance with supply/backing conservation, complete-set mint/burn and explicit valid/INVALID/VOID redemption. Existing disabled conversion is not authorization to tokenize leveraged positions.
-- **Main blockers:** asset qualification, backing/rounding/redemption invariants, operational/legal constraints and genuine market liquidity. Any bridge to Osyleum must prove that the same backing cannot support both token and ledger claims.
+- **Why difficult:** an Olyseum signed internal position is **not an ERC-20 spot asset**. A viable proposal is separately fully backed YES/NO issuance with supply/backing conservation, complete-set mint/burn and explicit valid/INVALID/VOID redemption. Existing disabled conversion is not authorization to tokenize leveraged positions.
+- **Main blockers:** asset qualification, backing/rounding/redemption invariants, operational/legal constraints and genuine market liquidity. Any bridge to Olyseum must prove that the same backing cannot support both token and ledger claims.
 - **Done/demo:** issuance -> actual Kuru trade -> final resolution -> correct redemption, including INVALID, VOID and failure paths; show real demand and an asset roadmap. PDF p.19 requirements are much broader than market deployment. [Kuru market deployment](https://docs.kuru.io/sdk/deploy-market).
 
 ### B09 - Dynamic
@@ -306,7 +306,7 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 - **Add/change:** NEW `packages/venue-adapters/src/perpl.ts`, `services/perpl-bot/`, durable order journal and bounded strategy controls. Separate account creation, forwarding authorization and API enrollment. Use owner-authorized EIP-712 enrollment of a scoped Ed25519 API key, exact request signing and sequence-aware streaming/reconciliation.
 - **Authorization:** programmatic enrollment needs the app/server Origin whitelisted by Perpl. Read/trade API scopes are distinct; API keys do not authorize withdrawals. Keep external-venue credentials segregated and encrypted. [Official integration guide](https://github.com/PerplFoundation/api-docs/blob/main/integrations.md).
-- **Main blockers:** sponsor enrollment access, real supported collateral, working adapter and a bounded approved trading budget. The bot must use **Perpl's** margin/fees/funding/liquidation rules, not Osyleum binary-outcome mathematics.
+- **Main blockers:** sponsor enrollment access, real supported collateral, working adapter and a bounded approved trading budget. The bot must use **Perpl's** margin/fees/funding/liquidation rules, not Olyseum binary-outcome mathematics.
 - **Done/demo:** actual order/fill/cancel, partial batch failure, reconnect, duplicate-request handling, stale-data pause and kill switch. An API acknowledgment is not a fill; batches are not assumed atomic. Report performance after fees/funding/slippage, not guaranteed profit. [REST reference](https://raw.githubusercontent.com/PerplFoundation/api-docs/main/rest-endpoints.md).
 - **Submission:** PDF p.23 requires working automation link and <=2-minute real-activity video. Reuse this adapter for B03; do not build two independent order pipelines.
 
@@ -315,7 +315,7 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 - **Add/change:** NEW `services/perpl-analytics/` with venue-specific backfill, fills/positions/funding/fees/collateral/liquidation tables and dashboard. Define realized/unrealized PnL, flow-adjusted drawdown, aggregation windows and missing-data behavior before exposing metrics.
 - **Hard blocker:** documented public market data does not imply access to every wallet's private history. Account/order/history endpoints are caller-key scoped. Obtain a permitted protocol-wide source or build the required onchain index. A deliberately narrower feature may still be useful, but **does not meet the full bounty requirements**; do not promise arbitrary-wallet analytics without data coverage. [Perpl REST reference](https://raw.githubusercontent.com/PerplFoundation/api-docs/main/rest-endpoints.md).
 - **Full requested coverage:** PDF p.25 specifies volume over 24h/7d/30d/all-time; OI/TVL/fees/users; flows and market skew; liquidations/funding; positions and venue-native liquidation prices; realized/unrealized PnL; win rate, profit factor, flow-adjusted drawdown and behavior; global wallet search/watch/compare and timeframe controls in a fast dark UI. Define each metric's denominator, data window and completeness before claiming support.
-- **Core impact:** Osyleum risk views remain Osyleum-only. Missing Perpl fees, position history or liquidation records must be marked unavailable rather than zero.
+- **Core impact:** Olyseum risk views remain Olyseum-only. Missing Perpl fees, position history or liquidation records must be marked unavailable rather than zero.
 - **Done/demo:** source-reconciled protocol metrics and address profiles supported by the actual dataset, with timestamps, drilldown and repeatable calculations. PDF p.24-25 requires dashboard link and <=2-minute walkthrough.
 
 ### B14 - Privy
@@ -329,7 +329,7 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 - **Add/change:** NEW `services/intelligence/src/nansen.ts` with server-side credentials, pagination/deduplication, bounded cache, quotas and chain/time/provenance labels; add useful wallet/collateral-flow context and alerts to the UI.
 - **Coverage:** current smart-money DEX endpoint schema includes Monad but covers a trailing 24-hour window; it is not an arbitrary historical query or proof of testnet coverage. If used beside our testnet app, label the external mainnet context explicitly. [Current endpoint schema](https://docs.nansen.ai/api/smart-money/dex-trades.md).
-- **Main blockers:** API access/credits and a relevant supported dataset. Do not infer Osyleum positions, exact Perpl PnL or event outcomes from unrelated token activity/labels.
+- **Main blockers:** API access/credits and a relevant supported dataset. Do not infer Olyseum positions, exact Perpl PnL or event outcomes from unrelated token activity/labels.
 - **Done/demo:** a useful sourced feature beyond raw JSON/basic price, with stale/empty/rate-limited behavior. Keep it out of margin admission, custody, settlement and authoritative INDEX construction. PDF p.27 requires explanation; optional <=2-minute video.
 
 ### B16 - Tencent Hunyuan
@@ -372,7 +372,7 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 ### B21 - MetaMask Agent Wallet plugin
 
-- **Add/change:** NEW `packages/metamask-agent-plugin/` from the official plugin template with package/command manifest, README, tests and `skills/eros/SKILL.md`. Add account/market reads and preview/place/cancel/claim commands using the shared Osyleum builder; add release/withdraw only with explicit outflow policy.
+- **Add/change:** NEW `packages/metamask-agent-plugin/` from the official plugin template with package/command manifest, README, tests and `skills/eros/SKILL.md`. Add account/market reads and preview/place/cancel/claim commands using the shared Olyseum builder; add release/withdraw only with explicit outflow policy.
 - **Security boundary:** all transaction submission **and signing**, including message/typed-data signing if exposed, must pass the host executor under its applicable capability/policy. Use `walletExecutor` for the supported transaction path; declare narrow read/submit capabilities and chain IDs. Enforce target/selector/amount/market/expiry limits in code. A skill document alone is not enforcement; do not import private keys or request mnemonic/config privileges. [Plugin build](https://docs.metamask.io/agent-wallet/plugins/build-a-plugin/), [executor/capabilities](https://docs.metamask.io/agent-wallet/reference/plugins/).
 - **Availability:** current docs list Monad mainnet and testnet. Confirm the installed CLI chain list, plugin support (6.2.0+) and Node 22+; relay/gas sponsorship is a separate capability. [Supported chains](https://docs.metamask.io/agent-wallet/reference/supported-chains/).
 - **Main blockers:** active market, funded plugin account, shared transaction client and policy/MFA behavior. Its owner is a separately identified account if different from the web wallet.
@@ -382,7 +382,7 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 | Blocker | Affected targets | Exact resolution / exit condition |
 |---|---|---|
-| Current deployment inactive, fixture collateral/manual authority, fixed halt clock | All Osyleum transaction demos | Correctly fund/activate/price a suitable demo market; use a new listing for real oracle or changed collateral; re-read current state before use |
+| Current deployment inactive, fixture collateral/manual authority, fixed halt clock | All Olyseum transaction demos | Correctly fund/activate/price a suitable demo market; use a new listing for real oracle or changed collateral; re-read current state before use |
 | Real factory and oracle/keeper boundary unfinished | CRE, full lifecycle, AI evidence product | SP-03; size/gas proof, actual roles/configuration and real-engine end-to-end receipts |
 | Independent INDEX delivery not proven in our branch | Active trading/INVALID demo | Obtain collector source/owner; SP-04 with source-bound signed vectors and live continuity |
 | No integrated product frontend on current risk checkout | Wallet, Envio and most user-facing bounties | Share or build the frontend; SP-01/SP-02; use current SDK/ABI rather than inventing balances |
@@ -398,11 +398,11 @@ Current Monad documentation lists a **30M per-transaction gas limit**, **128 KiB
 
 ### Collateral decision: AUSD is not an env-only substitution
 
-There are three different uses: **display AUSD in a wallet**, **use AUSD at an external venue**, and **make AUSD Osyleum collateral**. Only the last changes Osyleum deployment dependencies.
+There are three different uses: **display AUSD in a wallet**, **use AUSD at an external venue**, and **make AUSD Olyseum collateral**. Only the last changes Olyseum deployment dependencies.
 
 For that last option: qualify the exact network token, decimals, issuer controls, transfer behavior and freeze/pause/upgrade risks; explicitly agree the denomination/collateral policy against the current spec's six-decimal USDC assumption; deploy a new appropriate vault/engine listing; test exact receipt/send invariants and failed payouts. Our vault requires six decimals and exact transfers. Six decimals alone do not establish compatibility or equivalent economic assumptions. Agora documents upgrade/freeze controls. [Token security](https://docs.agora.finance/developer/security-and-compliance).
 
-The minimal demo can retain clearly labeled Osyleum fixture collateral and show separate AUSD/Perpl balances where required. Whether that combination qualifies is an organizer decision; do not imply the fixture token is official AUSD.
+The minimal demo can retain clearly labeled Olyseum fixture collateral and show separate AUSD/Perpl balances where required. Whether that combination qualifies is an organizer decision; do not imply the fixture token is official AUSD.
 
 ## 8. Configuration inventory to add later
 
@@ -410,7 +410,7 @@ This is a **design inventory, not a ready-to-run `.env`**. Names marked proposed
 
 | Configuration group | Existing source / proposed names | Handling |
 |---|---|---|
-| Osyleum chain/contracts | Existing `RISK_BOOK_*` address inventory, `ETH_RPC_URL`; [runbook](docs/runbooks/RISK_BOOK_ENV_AND_ADDRESSES.md) | Public addresses in versioned manifest; credential-bearing RPC URL private |
+| Olyseum chain/contracts | Existing `RISK_BOOK_*` address inventory, `ETH_RPC_URL`; [runbook](docs/runbooks/RISK_BOOK_ENV_AND_ADDRESSES.md) | Public addresses in versioned manifest; credential-bearing RPC URL private |
 | Alchemy / QuickNode | Proposed `ALCHEMY_MONAD_RPC_URL`, `QUICKNODE_MONAD_RPC_URL` | Server-side secrets, chain checks, per-provider quotas |
 | Envio | Existing oracle indexer env/config plus selected hosting/query URL and optional HyperSync token | Public query endpoint only if access policy permits; indexing tokens private |
 | Dynamic / Privy | Proposed `DYNAMIC_ENVIRONMENT_ID` **or** `PRIVY_APP_ID`; vendor-specific backend secrets if needed | Public ID allowed; server secrets not exposed; configure allowed domains |
@@ -450,7 +450,7 @@ These are proposed work packages for the merged product effort, not reinstated A
 | Phase | Work | Exit condition |
 |---|---|---|
 | 0 - scope/access | Confirm portal rules, primary track, wallet choice, exact credentials/network/model/data access | No essential feature depends on an imaginary API, route, model permission or eligibility |
-| 1 - usable core | SP-00/SP-01/SP-04; coordinate SP-03; establish active demo and terminal test markets | One real owner-correct Osyleum trade and a separately verified lifecycle exit |
+| 1 - usable core | SP-00/SP-01/SP-04; coordinate SP-03; establish active demo and terminal test markets | One real owner-correct Olyseum trade and a separately verified lifecycle exit |
 | 2 - strongest sponsors | SP-02 Envio, SP-05 Alchemy, selected wallet, B11 CRE | Live product uses each integration, failures handled, source-bound evidence saved |
 | 3 - reusable additions | B21 MetaMask client; B17 Kimi assistance; optional B15/B20 if useful | Real feature, security tests and required plugin/article assets |
 | 4 - external venue bundle | B03/B12/B13 Perpl or B07 Kuru, chosen deliberately | Separate custody/risk model, actual venue activity and justified data coverage |
@@ -485,7 +485,7 @@ PDF p.38 lists these separately from the 21 bounties. Grants, expiration and exa
 | QuickNode participant Build plan | Keep existing chain transport; bounded logs/reads/receipts behind SP-05 | Low; confirm enabled endpoints/quotas. Not gas funding or event truth |
 | Tenderly participant Pro | Simulations, failed-transaction replay, alerts/debugging | Low-Medium; confirm Monad and large-contract feature parity |
 | Dwellir participant Developer | Optional independent RPC fallback | Low; confirm chain/archive/log capabilities and quotas |
-| Zerion participant/winner Builder | External wallet/token context | Medium; no assumed testnet coverage or Osyleum internal PnL |
+| Zerion participant/winner Builder | External wallet/token context | Medium; no assumed testnet coverage or Olyseum internal PnL |
 | BlockVision participant Lite / winner Pro | Optional supported RPC/data tooling | Low-Medium; exact API/network access and budget |
 | Spectrum offering | Undetermined until exact product/API is identified | Unknown; do not design a dependency around an ambiguous name |
 | ack3 winner security scan | Scan pinned integrated source, reproduce and triage actual findings | Medium review work; scan offer is not an audit certificate |
@@ -500,11 +500,11 @@ PDF p.38 lists these separately from the 21 bounties. Grants, expiration and exa
 2. **Primary wallet:** Privy, Dynamic or Mera; if Mera, what session threat model and recovery guarantee are required?
 3. **Oracle/factory/INDEX ownership:** who supplies the live feed source, signer, factory implementation and operational roles for the new market?
 4. **Network and funds:** which sponsor features accept testnet, which require mainnet data/activity, and what explicit transaction/API-credit budgets are authorized? No mainnet execution is authorized by this plan.
-5. **Collateral:** keep the controlled Osyleum demo token, or separately qualify/deploy an AUSD-backed market? Do not conflate this with merely displaying AUSD.
+5. **Collateral:** keep the controlled Olyseum demo token, or separately qualify/deploy an AUSD-backed market? Do not conflate this with merely displaying AUSD.
 6. **Access:** obtain real API/app/model credentials, Perpl enrollment/data access, routing quotes and any gated Cleanverse requirements before committing to those features.
 7. **Organizer confirmation:** verify track/stacking eligibility, exact model/provider rules, current video/article fields and deadline using the live portal.
 
-**Recommended next step:** approve one bundle and turn phases 0-2 into implementation tasks. Preserve the core risk/book invariants; add sponsor adapters around them. The largest optional targets should not delay a credible working Osyleum demo.
+**Recommended next step:** approve one bundle and turn phases 0-2 into implementation tasks. Preserve the core risk/book invariants; add sponsor adapters around them. The largest optional targets should not delay a credible working Olyseum demo.
 
 ---
 

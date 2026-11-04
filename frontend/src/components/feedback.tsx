@@ -44,7 +44,7 @@ export function LoadingPanel({ label = "Loading market data" }: { label?: string
 }
 
 export function PageLoading({ title = "Loading your view" }: { title?: string }) {
-  return <main className="mx-auto min-h-[60vh] w-full max-w-[1280px] px-4 py-12 md:px-8"><h1 className="display mb-8 text-3xl">{title}</h1><LoadingPanel label="Connecting to Osyleum" /></main>;
+  return <main className="mx-auto min-h-[60vh] w-full max-w-[1280px] px-4 py-12 md:px-8"><h1 className="display mb-8 text-3xl">{title}</h1><LoadingPanel label="Connecting to Olyseum" /></main>;
 }
 
 export function ReadError({ message, retry }: { message: string; retry: () => void }) {

@@ -1,7 +1,7 @@
 # Native spot prediction market (NBA: Heat at Warriors, 5 Nov 2026 PT)
 
 A normal prediction market: YES and NO ERC-20 tokens backed 1:1 by tUSDC in a `NativeOutcomeVault`,
-traded on two Kuru order books and resolved by the Osyleum oracle from API-Sports basketball. No perp,
+traded on two Kuru order books and resolved by the Olyseum oracle from API-Sports basketball. No perp,
 INDEX source, signer, perp keeper or funding exists for this market. Items NM-S01..S12.
 
 | | |
@@ -34,13 +34,13 @@ MarketRegistry ──▶ SpotResolutionAnchor ◀── ResolutionOracle ◀─�
   reports YES/NO, the service asserts it (120 s liveness) and finalizes, then calls `vault.syncResolution()`.
   No clean API result within T+6 h: `escalateToL2` hands over to the committee/review route.
 - Kuru books are permissionless, so tokens can trade during the game like any prediction market.
-  The Osyleum maker stops quoting 60 s before tip-off.
+  The Olyseum maker stops quoting 60 s before tip-off.
 
 ## Bots
 
 | Service | What it does |
 |---|---|
-| `maker.ts` | Osyleum liquidity. Holds complete sets; quotes YES `fair ± H` and NO `(1000−fair) ± H` (H = 15 ticks, 100 claims). YES ask + NO ask > 1 and YES bid + NO bid < 1, so its quotes never offer a split/merge arbitrage. `fair` starts at `OPEN_TICK` and moves only with its own net fills (4 ticks per 100 claims, at most 10 per loop). Stops quoting one side at ±600 net claims. Cancels everything 60 s before T. |
+| `maker.ts` | Olyseum liquidity. Holds complete sets; quotes YES `fair ± H` and NO `(1000−fair) ± H` (H = 15 ticks, 100 claims). YES ask + NO ask > 1 and YES bid + NO bid < 1, so its quotes never offer a split/merge arbitrage. `fair` starts at `OPEN_TICK` and moves only with its own net fills (4 ticks per 100 claims, at most 10 per loop). Stops quoting one side at ±600 net claims. Cancels everything 60 s before T. |
 | `daily-trader.ts` | One real taker trade per UTC day at 17:00: market-buys 10 claims, alternating YES/NO, with a 90% minimum fill and a 0.95 price cap. Holds to resolution. State file prevents double trades. |
 | `lifecycle.ts` | The oracle calls listed above; never reports outcomes itself. |
 

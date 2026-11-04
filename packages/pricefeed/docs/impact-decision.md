@@ -49,7 +49,7 @@ Provider references checked 03 October 2026:
 [fees](https://docs.polymarket.com/trading/fees) and
 [order books](https://docs.polymarket.com/market-data/prices-order-books).
 These document provider inputs; the before-fee index treatment is the explicit
-user-selected Osyleum policy, not a provider requirement.
+user-selected Olyseum policy, not a provider requirement.
 
 The existing engine accepts signed depth summaries; it does not walk the
 Polymarket book or choose VWAP versus marginal pricing. Both methods are

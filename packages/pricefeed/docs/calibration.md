@@ -50,7 +50,7 @@ another 108 followed. The independent review passed **108 grid cells**.
 Crypto/politics reused their disabled examples. The original sports example was
 closed; the disabled replacement was the Yes token of market 741099/event 92909,
 “Will LeBron James retire before next NBA season?”. Its public event tags included
-sports/NBA. No Osyleum semantics/horizon/exception mapping approval is implied.
+sports/NBA. No Olyseum semantics/horizon/exception mapping approval is implied.
 
 At N=1,000,000 lots, spread=0.05 and an assumed five-second delivery delay:
 
@@ -75,7 +75,7 @@ from 284.987 to 211.476 seconds and politics from 300 to 294.960 seconds.
 At 0.05, reducing N did not repair the timestamp gaps in this run. Widening the
 spread cannot solve stale clocks. Actual fills, fee schedules and quote/collateral
 equivalence were not measured, and displayed depth is not guaranteed executable
-liquidity. This external-index study does not calibrate the Osyleum own-perp book;
+liquidity. This external-index study does not calibrate the Olyseum own-perp book;
 its independent spread/depth constraints still apply under risk ownership.
 
 **Operating implication:** keep five seconds as a measured diagnostic candidate,

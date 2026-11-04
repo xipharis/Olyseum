@@ -456,7 +456,7 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
           <p className="label text-signal-text">This trade includes collateral</p>
           <ol className="mt-2 grid gap-1.5 text-fg-2">
             {[
-              fundingSteps.approve > 0n && `Allow the Osyleum vault to use ${atomsToUsdc(fundingSteps.approve)} ${symbol}`,
+              fundingSteps.approve > 0n && `Allow the Olyseum vault to use ${atomsToUsdc(fundingSteps.approve)} ${symbol}`,
               fundingSteps.deposit > 0n && `Deposit ${atomsToUsdc(fundingSteps.deposit)} ${symbol} from your wallet into the vault`,
               `Move ${atomsToUsdc(fundingSteps.allocate)} ${symbol} into this market as collateral${fundingSteps.deposit < fundingSteps.allocate ? ` (${atomsToUsdc(fundingSteps.allocate - fundingSteps.deposit)} already in your vault)` : ""}`,
               `Place the order: ${intentLabel(tradeIntent)} · ${lotsToClaims(parsed.lots)} shares · ${orderType}${marketOrder ? ` ${side === "buy" ? "at most" : "at least"}` : " at"} YES ${price}`,

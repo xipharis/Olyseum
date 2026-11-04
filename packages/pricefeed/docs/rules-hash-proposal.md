@@ -58,7 +58,7 @@ arbitrarily formatted JSON file. The field/type schema and version domain remain
 proposed until agreed with the Q04 owners.
 
 The manifest should bind the venue, exact event/market/condition/outcome-token
-mapping and approved Osyleum event-rules identity; reviewed external rules evidence;
+mapping and approved Olyseum event-rules identity; reviewed external rules evidence;
 quote/quantity policies; VWAP, rounding, fee and depth policies; N and maximum
 spread; timestamp policy; and invalid/closure semantics. Policy references must
 identify immutable definitions, not mutable labels. Q05-Q08/Q10 inputs remain

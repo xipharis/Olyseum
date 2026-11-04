@@ -30,7 +30,7 @@ export function WarmingUp({ compact = false, className }: { compact?: boolean; c
         <span key={index} className="warming-phrase tnum">{PHRASES[index]}…</span>
       </p>
       <p aria-hidden className={cx("leading-relaxed text-fg-3", compact ? "text-2xs" : "text-xs")}>
-        Give it some more time — Osyleum allows leveraged trades on events.
+        Give it some more time — Olyseum allows leveraged trades on events.
       </p>
     </div>
   );

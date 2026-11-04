@@ -1,12 +1,12 @@
 {
-  "title": "Choose the visual world for Osyleum",
+  "title": "Choose the visual world for Olyseum",
   "question": "The roll assigned the Depth Ladder: the logo's own grammar grown into the whole terminal. Keep it, take an alternate, or re-roll.",
   "options": [
     {
       "id": "assigned",
       "label": "Depth Ladder",
       "kicker": "THE ROLL",
-      "lineage": "the Osyleum mark: stacked ivory bars, one Signal bar for the mark price",
+      "lineage": "the Olyseum mark: stacked ivory bars, one Signal bar for the mark price",
       "thesis": "The interface is the logo: price drawn as stacked bars, the mark price as one Signal bar that crosses chart, book and your position at the same height.",
       "palette": ["#0A0A0B", "#F2F1EC", "#FF5A36", "#16171A", "#8E8C84", "#5FB28A", "#E0533D"],
       "materials": ["solid flat bars", "1-device-pixel hairline rules", "tabular figures", "zero radius"],
@@ -123,7 +123,7 @@
   "canon": true,
   "canonCard": {
     "label": "The category standard",
-    "thesis": "A dark perp-exchange terminal executed impeccably, in Osyleum colours.",
+    "thesis": "A dark perp-exchange terminal executed impeccably, in Olyseum colours.",
     "palette": ["#0A0A0B", "#16171A", "#F2F1EC", "#FF5A36"],
     "materials": ["panel grid", "tabular data"],
     "viewport": "Chart centre, book right, ticket far right, positions table below.",

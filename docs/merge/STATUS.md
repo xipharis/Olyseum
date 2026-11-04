@@ -1332,3 +1332,15 @@ failure or new A-I01 regression was found; lifecycle-policy changes require sepa
 - Tests (exit 0): `frontend`: `npm run typecheck`; `npm test` 158/158. Both ran on a working tree
   that included those uncommitted edits.
 - Not run: e2e suites; the changed line is not exercised by them because fixtures set no `source`.
+
+### 2026-11-04 (BRAND-OLYSEUM) — project name corrected to Olyseum
+- Who: Claude Code, at the user's request: the name is Olyseum, matching the repo, not Osyleum.
+- What: replaced Osyleum/osyleum/OSYLEUM with Olyseum/olyseum/OLYSEUM in every tracked text file,
+  including the frontend package name, `isNativeMarket`, market `source` strings, the wordmark and
+  the `olyseum-theme` storage key. A browser that saved a theme under `osyleum-theme` falls back to
+  the default once.
+- Kept: the two entries above, which record the earlier rename under the IDs in their commits, and
+  the `Eros` identifiers listed under BRAND-OSYLEUM-2.
+- Tests (exit 0): `frontend`: `npm run typecheck`; `npm test` 165/165. Both ran on a working tree
+  that also held uncommitted ticket and collateral work, which this commit does not include.
+- Not run: e2e suites, `next build`, gates, contract tests. No contract source changed.

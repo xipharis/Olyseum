@@ -472,7 +472,7 @@ must also be measured against the selected endpoint.
    feed and failure-injection helpers. It remains a test fixture. The deployment
    owner must supply a reviewed concrete artifact and check target-chain size/gas
    feasibility and the open RB-I01 disposition. The local pricefeed demo is also
-   a fixture, not the actual Osyleum deployment.
+   a fixture, not the actual Olyseum deployment.
 2. The owner supplies the testnet listing/source/rules/signing-address dossier
    and dependency addresses/parameters. A deployer needs their own testnet wallet
    funded with MON from the faucet. Do not reuse the public local fixture keys.
@@ -488,7 +488,7 @@ must also be measured against the selected endpoint.
    listing dossier and runtime code hash. The pricefeed workstream does not
    authorize editing the risk team's deployment wiring. The subsequently
    authorized standalone receiver above is a completed diagnostic deployment,
-   not evidence that the full Osyleum engine is deployed.
+   not evidence that the full Olyseum engine is deployed.
 
 For the deployed engine, prepare a disabled MarketConfig with these pins:
 

@@ -1,8 +1,8 @@
 
-# Osyleum frontend: complete build guide
+# Olyseum frontend: complete build guide
 
 Written 2026-10-05 against `feat/pricefeed` @ `273bc6e` (contains `integration/risk` @ `e2b48c5`).
-This is the single guide for building the Osyleum web app on top of the existing contracts,
+This is the single guide for building the Olyseum web app on top of the existing contracts,
 SDKs and indexer. It says what to build, which contract function backs every button and number,
 how the leveraged risk engine works from a trader's point of view, and which rules the UI must
 never break. Re-verify anything marked **verify** before relying on it.
@@ -76,7 +76,7 @@ From the risk spec, `docs/risk/HANDOFF.md` §9, `SPONSOR_INTEGRATION_PLAN.md` §
 
 ## 1. The product
 
-Osyleum lists **binary event perpetuals**: each market is a YES/NO question resolving at or
+Olyseum lists **binary event perpetuals**: each market is a YES/NO question resolving at or
 after a scheduled time `T`. A **claim** pays 1 USDC if YES, 0 if NO; INVALID pays a captured
 price between 0 and 1. Traders buy and sell claims on a fully on-chain limit order book, priced as
 probabilities in **ticks** 1..999 (tick 600 = 0.600).
@@ -959,7 +959,7 @@ Reads: `MarketRegistry.getQuestion/getRules/getMarketCore(id)`, `ResolutionOracl
 | Propose (Open) | `TestUSDC.approve(UmaAdapter, B)` → `proposePermissionless(id, outcome, evidenceURI, evidenceHash)` | outcomes in `rejectedMask` disabled; `B = bondFor(id)` |
 | Progress | `haltScheduled`, `requestResolution`, `escalateToL2`, `openAfterDeadline`, `assertProposal`, `syncAssertion`, `finalizeMarket`, `voidMarket`, `expireEarly`; `KeeperRouter.finalizeMany(ids)` | most return `false` as no-op |
 
-Banners: "Disputes on testnet are decided by the Osyleum team through a sandbox oracle, not by UMA
+Banners: "Disputes on testnet are decided by the Olyseum team through a sandbox oracle, not by UMA
 voters."; "Layer 1 runs on a single simulation node, not a Chainlink DON." Committee signing stays in
 the CLI console; a web version must reuse `oracle-sdk/eip712.ts`.
 

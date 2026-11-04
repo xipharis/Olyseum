@@ -57,7 +57,7 @@ Book, price-change, last-trade and best-bid/ask events wake only workers matchin
 both condition ID and token ID. Their prices, depth, hashes and timestamps are
 not used as authoritative evidence. Tick-size and market lifecycle hints also
 invalidate cached publication evidence and require metadata revalidation. A
-source resolution message cannot resolve Osyleum or replace its oracle.
+source resolution message cannot resolve Olyseum or replace its oracle.
 
 Each worker has one pending refresh slot. Bursts coalesce, polls never overlap,
 and diagnostic hints cannot start requests more frequently than once per second.

@@ -25,7 +25,7 @@ type Props = {
   warming?: boolean;
   historyStatus: string;
   readError?: boolean;
-  /** Price source label, e.g. "Polymarket" or "Osyleum native (Kuru)". */
+  /** Price source label, e.g. "Polymarket" or "Olyseum native (Kuru)". */
   source?: string;
 };
 

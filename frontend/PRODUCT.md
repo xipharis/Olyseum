@@ -23,7 +23,7 @@ participants on the resolution pages.
 
 ## Product Purpose
 
-Osyleum lists binary event perpetuals on Monad: each market is a YES/NO question resolving at a
+Olyseum lists binary event perpetuals on Monad: each market is a YES/NO question resolving at a
 scheduled time T. Traders buy and sell claims (1 claim pays 1 USDC on YES) on a fully on-chain limit
 order book, fully backed or leveraged, with an isolated reserve covering leveraged deficits. Success:
 a trader can fund, trade, manage risk and claim their payout with every number matching the contracts
@@ -59,7 +59,7 @@ mark warming up, sweep running) and must say so.
 
 ## Brand Commitments
 
-- Name: Osyleum. Logo assets in `~/Downloads/Eros_Markets/` (svg, png, favicon). The mark is a
+- Name: Olyseum. Logo assets in `~/Downloads/Eros_Markets/` (svg, png, favicon). The mark is a
   stack of white bars (a depth ladder) with one Signal bar at centre: "the mark price".
 - Colours (binding, user direction 2026-10-13): black `#000000`, white `#FFFFFF`, orange `#FF5A36`, green `#5FD394`; no other hues.
 - **Dark theme only (user direction 2026-10-13):** black ground, white text; no light theme and no theme switcher.
@@ -70,7 +70,7 @@ mark warming up, sweep running) and must say so.
   https://v0-design-brutalist-ai-saa-s.vercel.app/) is the site's theme for every surface: black
   dot-grid ground, hard 1px grey frames, single-family Geist Mono type, mono uppercase labels, `// SECTION` rules,
   bento panels, black terminal panels, arrow-square buttons, scramble text, marquees. Its rounded pills
-  are translated to rounded rectangles. Its invented demo metrics are not copied: Osyleum shows only live chain
+  are translated to rounded rectangles. Its invented demo metrics are not copied: Olyseum shows only live chain
   values or real protocol constants.
 
 ## Evidence on Hand
