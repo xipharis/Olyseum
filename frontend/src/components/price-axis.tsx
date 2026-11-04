@@ -27,6 +27,8 @@ type Props = {
   readError?: boolean;
   /** Price source label, e.g. "Polymarket" or "Olyseum native (Kuru)". */
   source?: string;
+  /** The viewer's own confirmed fills, drawn at their real time and price. */
+  fills?: { t: number; v: number; label: string; tx: string }[];
 };
 
 /** Historical points are authenticated source observations, not reconstructed mark prices. */
@@ -65,12 +67,13 @@ export function PriceAxis(p: Props) {
     const perp = book ? p.perp.filter(v => v.t >= start && v.t <= end) : [];
     const indexSegments = priceSegments(index), perpSegments = priceSegments(perp), indexBridges = priceBridges(index);
     const availableIndex = index.filter(v => v.valid !== false), availablePerp = perp.filter(v => v.valid !== false);
-    const values = [...availableIndex.map(v => v.v), ...availablePerp.map(v => v.v), ...(mark && p.markUnit !== undefined ? [p.markUnit] : [])];
+    const fills = (p.fills ?? []).filter(v => v.t >= start && v.t <= end);
+    const values = [...availableIndex.map(v => v.v), ...availablePerp.map(v => v.v), ...fills.map(v => v.v), ...(mark && p.markUnit !== undefined ? [p.markUnit] : [])];
     const min = values.length ? Math.min(...values) : Math.max(0, (p.indexUnit ?? 0.5) - 0.05);
     const max = values.length ? Math.max(...values) : Math.min(1, (p.indexUnit ?? 0.5) + 0.05);
     const padding = Math.max((max - min) * 0.2, 0.002);
-    return { start, end, index: availableIndex, perp: availablePerp, indexSegments, perpSegments, indexBridges, lo: Math.max(0, min - padding), hi: Math.min(1, max + padding) };
-  }, [p.index, p.perp, p.markUnit, p.indexUnit, range, now, book, mark]);
+    return { start, end, fills, index: availableIndex, perp: availablePerp, indexSegments, perpSegments, indexBridges, lo: Math.max(0, min - padding), hi: Math.min(1, max + padding) };
+  }, [p.index, p.perp, p.fills, p.markUnit, p.indexUnit, range, now, book, mark]);
   const left = 14, right = Math.max(left + 1, width - 62), top = 18, bottom = height - 32;
   const x = (t: number) => left + (t - model.start) / (model.end - model.start) * (right - left);
   const y = (v: number) => bottom - (v - model.lo) / (model.hi - model.lo) * (bottom - top);
@@ -126,6 +129,7 @@ export function PriceAxis(p: Props) {
             </path>}
             <path d={path(model.indexSegments)} fill="none" stroke="var(--color-signal)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
             {model.indexSegments.map(segment => segment[0]).map(pt => <circle key={`${pt.t}-${pt.block}`} cx={x(pt.t)} cy={y(pt.v)} r={2} fill="var(--color-signal)" />)}
+            {model.fills.map(f => <g key={f.tx}><circle cx={x(f.t)} cy={y(f.v)} r={4} fill="var(--color-bid)" stroke="var(--color-ground)" strokeWidth={1.5}><title>{f.label}</title></circle><text x={Math.min(x(f.t) + 7, right - 90)} y={Math.max(y(f.v) - 7, top + 8)} fontSize={10} fill="var(--color-fg-2)">{f.label}</text></g>)}
             {last && <g><circle cx={x(last.t)} cy={y(last.v)} r={fresh ? 7 : 4} fill="var(--color-signal)" opacity={0.15} className={fresh ? "motion-safe:animate-pulse" : ""} /><circle cx={x(last.t)} cy={y(last.v)} r={3} fill="var(--color-signal)" /></g>}
             {hovered && <g><line x1={x(hovered.t)} x2={x(hovered.t)} y1={top} y2={bottom} stroke="var(--color-fg-4)" strokeDasharray="3 3" /><line x1={left} x2={right} y1={y(hovered.v)} y2={y(hovered.v)} stroke="var(--color-fg-4)" strokeDasharray="3 3" /><circle cx={x(hovered.t)} cy={y(hovered.v)} r={5} fill="var(--color-signal)" stroke="var(--color-ground)" strokeWidth={2} /></g>}
           </g>

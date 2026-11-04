@@ -169,6 +169,8 @@ export function Terminal({ manifest }: { manifest: MarketManifest }) {
         <div className={cx(card, "flex min-h-[26rem]")} aria-busy={!md && !publicUnavailable}>
           <div className="flex min-w-0 flex-1 [&>*]:min-w-0 [&>*]:flex-1">
             <PriceAxis index={live.index} perp={live.perp}
+              fills={trader?.traderId ? live.trades.filter(f => f.taker === trader.traderId || f.maker === trader.traderId)
+                .map(f => ({ t: f.t, v: f.tick / 1000, tx: `${f.tx}:${f.block}:${f.size}`, label: `Your fill: ${lotsToClaims(f.size)} @ ${(f.tick / 1000).toFixed(3)}` })) : undefined}
               markUnit={md?.risk.markAvailable ? wadToUnit(md.risk.markWad) : undefined}
               indexUnit={md?.risk.indexAvailable ? wadToUnit(md.risk.indexWad) : undefined}
               emptyTitle={!md ? "Loading market" : manifest.archived ? "Market archived" : !md.active ? "Trading has not opened" : "Waiting for price"}

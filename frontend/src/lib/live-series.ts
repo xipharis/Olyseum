@@ -3,7 +3,7 @@ import { LOG_BLOCK_CAP } from "@/config/chain";
 import { client } from "./public-client";
 
 export type Point = { t: number; v: number; block: bigint; valid?: boolean };
-export type Trade = { t: number; tick: number; size: bigint; block: bigint; tx: Hex };
+export type Trade = { t: number; tick: number; size: bigint; block: bigint; tx: Hex; maker?: number; taker?: number };
 export type LiveSeries = { index: Point[]; perp: Point[]; trades: Trade[]; since?: bigint; cursor?: bigint; cursorHash?: Hex; error?: string };
 export const emptySeries = (): LiveSeries => ({ index: [], perp: [], trades: [] });
 const OBS = parseAbiItem("event ObservationAccepted(bytes32 indexed sourceId, uint64 indexed sequence, uint64 observedAt, uint64 publishedAt, uint64 acceptedAt, uint256 priceWad, bool depthValid, bytes32 payloadDigest)");
@@ -30,6 +30,6 @@ export async function readLiveSeries(engine: Address, head: bigint, previous: Li
     cursor: to, cursorHash: anchor.hash, since: reset ? from : previous.since ?? from,
     index: [...(reset ? [] : previous.index.filter((p) => p.block < from)), ...obs.map((l) => ({ valid: l.args.depthValid, t: Number(l.args.observedAt), v: Number(l.args.priceWad! / 10n ** 12n) / 1e6, block: l.blockNumber! }))].slice(-2000),
     perp: [...(reset ? [] : previous.perp.filter((p) => p.block < from)), ...perp.map((l) => ({ valid: l.args.valid, t: Number(l.args.t), v: Number(l.args.midWad! / 10n ** 12n) / 1e6, block: l.blockNumber! }))].slice(-2000),
-    trades: [...(reset ? [] : previous.trades.filter((p) => p.block < from)), ...fills.map((l) => ({ t: timestamps.get(l.blockNumber!)!, tick: l.args.tick!, size: l.args.size!, block: l.blockNumber!, tx: l.transactionHash! }))].slice(-500),
+    trades: [...(reset ? [] : previous.trades.filter((p) => p.block < from)), ...fills.map((l) => ({ t: timestamps.get(l.blockNumber!)!, tick: l.args.tick!, size: l.args.size!, block: l.blockNumber!, tx: l.transactionHash!, maker: l.args.maker!, taker: l.args.taker! }))].slice(-500),
   };
 }

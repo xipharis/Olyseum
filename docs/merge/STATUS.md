@@ -1376,3 +1376,21 @@ failure or new A-I01 regression was found; lifecycle-policy changes require sepa
   `KEEPER_LOTS` itself, and the refill has not run in a live keeper loop.
 - Open: the ticket does not limit orders to the remaining cap. An order above it passes the preview, then
   reverts after its collateral has moved. Another session is deploying a new market; check it for fills.
+
+### 2026-11-04 (FRONTEND-APPROVE-ONCE) — One in-app approval and real fill markers
+
+- User asked for 5× on 10 claims with a single money prompt, graph and funds updating. Built on real
+  on-chain trades only; a simulated flow presented as authentic was declined.
+- Ticket: embedded wallets get one in-app approval panel covering funding and the order (`sendApproved`,
+  allowlisted calls only). Releases and withdrawals keep wallet prompts; external wallets prompt per step.
+  Instant trading is now opt-in.
+- Price chart: the viewer's own confirmed fills are drawn from chain `Fill` events (`maker`/`taker`).
+- Live check, test wallet `0x5076…526a`, engine `0x0ff5…45C0`: 1.204 tUSDC collateral, 10 claims filled,
+  4.946× actual, closed flat. Open tx `0x6d86d523…`, close tx `0xd958859c…`. Demo risk profile
+  `0x17eaf089…` (synthetic, epsilon 0.25), not empirical calibration.
+- Tests: `npm run typecheck` exit 0; `npm test` exit 0 (165/165). `node --test tests/browser/ticket.browser.mjs`
+  exit 1: 9/9 fail at build, `fixture:deployment` lacks exports used by `history.ts` and `market-discovery.ts`;
+  the fixture was not changed here.
+- Not verified: the approval panel and fill marker in a browser with a logged-in wallet.
+- Open: Nov 7 market still has no prices; operator of the root wallet and remote workers unidentified;
+  ticket browser fixture needs updating.

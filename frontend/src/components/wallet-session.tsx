@@ -20,6 +20,8 @@ type WalletSession = {
   instant: boolean;
   setInstant: (on: boolean) => void;
   sendInstant?: (tx: { to: Address; data: Hex; gas: bigint }) => Promise<Hash>;
+  /** Signs without Privy's screen for one flow the user has just approved in this app. Embedded wallets only. */
+  sendApproved?: (tx: { to: Address; data: Hex; gas: bigint }) => Promise<Hash>;
 };
 
 // Public market reads still work when Privy has not been configured.

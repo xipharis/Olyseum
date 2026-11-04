@@ -46,7 +46,7 @@ const attempts = () => new DelegatedAttemptStore(window.sessionStorage, delegate
 export function useTx() {
   const config = useConfig();
   const qc = useQueryClient();
-  const { getSnapshot, sendInstant } = useWalletSession();
+  const { getSnapshot, sendInstant, sendApproved } = useWalletSession();
   const running = useRef(false);
   const [result, setResult] = useState<{ scope: string; state: TxState }>({ scope: "", state: { status: "idle" } });
   const current = getSnapshot();
@@ -55,7 +55,9 @@ export function useTx() {
   let recovery: DelegatedAttempt | undefined;
   try { if (current.address && typeof window !== "undefined") recovery = attempts().read(current.address); } catch { /* run() fails closed on an unreadable saved request. */ }
 
-  async function run(account: Address, calls: Call[], summarize?: (logs: readonly unknown[]) => { summary: string; tone: "bid" | "ask" | "neutral" }, delegated?: { previewBlock: bigint }, recoverSaved = false): Promise<boolean> {
+  async function run(account: Address, calls: Call[], summarize?: (logs: readonly unknown[]) => { summary: string; tone: "bid" | "ask" | "neutral" }, delegated?: { previewBlock: bigint }, recoverSaved = false, approvedOnce = false): Promise<boolean> {
+    // `approvedOnce`: the user confirmed this exact flow in the app, so its allowlisted calls share that one approval.
+    const silentSend = sendInstant ?? (approvedOnce ? sendApproved : undefined);
     if (running.current) return false;
     running.current = true;
     const setState = (state: TxState) => setResult({ scope, state });
@@ -142,9 +144,9 @@ export function useTx() {
                 connectorUid: guard.initial.connectorUid!, sessionVersion: guard.initial.version, createdAt: Date.now() };
             }
             hash = await recoverDelegatedAttempt(store!, attempt, body => privyRequest<{ hash: Hash }>("/api/trade", body, guard.assertCurrent));
-          } else if (sendInstant && instantAllowed(c)) {
+          } else if (silentSend && instantAllowed(c)) {
             setState({ status: "pending", step: `Signing ${c.label}` });
-            hash = await sendInstant({ to: c.address, data: encodeFunctionData({ abi: c.abi, functionName: c.functionName, args: c.args ?? [] }), gas });
+            hash = await silentSend({ to: c.address, data: encodeFunctionData({ abi: c.abi, functionName: c.functionName, args: c.args ?? [] }), gas });
           } else hash = await writeContract(config, { ...request, account, connector, chainId: chain.id, gas } as never);
           last = hash;
           currentHash = hash;
