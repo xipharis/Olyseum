@@ -2,6 +2,7 @@
 
 import { MoneyPanel } from "./money-panel";
 
+import { useState } from "react";
 import type { Address } from "viem";
 import { ExternalLink } from "lucide-react";
 import { isClaimable, decodeSettlementStatus, STATUS_TEXT } from "@eros/risk-sdk";
@@ -15,6 +16,7 @@ import { Button, Chip, Num, RegionHead, Row, Stat, Unavailable, cx } from "./ui"
 import type { Point } from "@/lib/reads";
 import { latestSourceObservation } from "@/lib/price-chart";
 import { positionLabel } from "@/lib/position-label";
+import { sharesToLots } from "@/lib/trade-intent";
 import terminalStyles from "./terminal.module.css";
 import { AccountActions } from "./account-actions";
 
@@ -199,7 +201,37 @@ export function MarketInfo({ manifest, m }: { manifest: MarketManifest; m?: Mark
 const usd2 = (q: bigint) => qToMoney(q).usdc.replace(/(\.\d{2})\d+$/, "$1");
 
 /** Position and margin below the chart (contract FIRST VIEWPORT): contract previews only, at one block. */
-export function PositionPanel({ engine, m, t, onReduce }: { engine: Address; m?: MarketSnapshot; t?: TraderSnapshot; onReduce?: (bps: number) => void }) {
+const REDUCE_SHARES = [25, 50, 75, 100];
+
+/** Choose how much of the position to sell: any amount, or a share of it. The order is reviewed in the ticket. */
+function ReduceControls({ position, disabled, fillableLots, onReduce }: { position: bigint; disabled: boolean; fillableLots?: bigint; onReduce?: (lots: bigint) => void }) {
+  const [amount, setAmount] = useState("");
+  const size = position < 0n ? -position : position;
+  const lots = sharesToLots(amount);
+  const error = !amount.trim() ? undefined : lots === undefined ? "Enter a number with up to three decimals" : lots === 0n ? "Enter more than zero"
+    : lots > size ? `You hold ${lotsToClaims(size)} shares` : undefined;
+  const ready = lots !== undefined && lots > 0n && lots <= size;
+  const action = position > 0n ? "Sell" : "Buy back";
+  const thin = fillableLots !== undefined && fillableLots < (ready ? lots : size);
+  return <div className="grid gap-2 border-t border-line px-4 py-3">
+    <div className="flex flex-wrap items-center gap-2">
+      <label className="flex h-8 min-w-0 items-center gap-2 rounded-control px-3 text-sm shadow-[inset_0_0_0_1px_var(--color-line-strong)]">
+        <span className="shrink-0 text-xs text-fg-3">{action}</span>
+        <input aria-label={`Shares to ${action.toLowerCase()}`} inputMode="decimal" placeholder="0.000" value={amount} onChange={(e) => setAmount(e.target.value)}
+          className="w-24 min-w-0 bg-transparent tnum text-fg placeholder:text-fg-4 focus:outline-none" />
+      </label>
+      {REDUCE_SHARES.map((share) => <Button key={share} size="sm" variant="ghost" onClick={() => setAmount(lotsToClaims(size * BigInt(share) / 100n))}>{share}%</Button>)}
+      <Button size="sm" disabled={disabled || !ready} onClick={() => { if (ready) onReduce?.(lots); }} title="Prepare a reduce-only order for this amount">{action} amount</Button>
+      <Button size="sm" disabled={disabled} onClick={() => onReduce?.(size)} title="Prepare a close order; once it fills, the remaining collateral returns to your wallet">Close position</Button>
+    </div>
+    {error && <p role="alert" className="text-xs text-ask">{error}</p>}
+    {thin && <p role="status" className="text-xs text-signal-text">
+      {fillableLots === 0n ? "The book has no orders to fill this right now." : `The book can fill ${lotsToClaims(fillableLots)} shares right now. Anything above that stays open, so you may need more than one order.`}
+    </p>}
+  </div>;
+}
+
+export function PositionPanel({ engine, m, t, onReduce, fillableLots }: { engine: Address; m?: MarketSnapshot; t?: TraderSnapshot; onReduce?: (lots: bigint) => void; fillableLots?: bigint }) {
   const owner = useOwner();
   if (!owner.connected) return <p className="px-4 py-6 text-xs text-fg-3">Log in to see your positions.</p>;
   if (!t) return <p role="status" className="p-4 text-xs text-fg-3">Reading your account…</p>;
@@ -215,10 +247,7 @@ export function PositionPanel({ engine, m, t, onReduce }: { engine: Address; m?:
           : "Position at risk of liquidation. Add collateral or reduce your position."}
       </p>}
       <div className="p-4"><MoneyPanel engine={engine} owner={owner.address} m={m} t={t} /></div>
-      {p.positionLots !== 0n && !m?.halted && <div className="flex flex-wrap items-center gap-2 border-t border-line px-4 py-3">
-        <Button size="sm" disabled={!canReduce} onClick={() => onReduce?.(10000)} title="Prepare a close order; once it fills, the remaining collateral returns to your wallet">Close position</Button>
-        {(p.positionLots > 1n || p.positionLots < -1n) && <Button size="sm" disabled={!canReduce} onClick={() => onReduce?.(5000)} title="Prepare an order to reduce your position by half">Reduce 50%</Button>}
-      </div>}
+      {p.positionLots !== 0n && !m?.halted && <ReduceControls key={engine} position={p.positionLots} disabled={!canReduce} fillableLots={fillableLots} onReduce={onReduce} />}
       <details className="px-4">
         <summary className="cursor-pointer py-3 text-xs text-fg-2 focus-visible:outline-2 focus-visible:outline-signal">Margin & funding details</summary>
         <div className={cx(terminalStyles.details, "grid gap-x-8 pb-3")}>

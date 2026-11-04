@@ -23,5 +23,40 @@ export function requiredCollateralQ({ lots, tick, isBuy, leverage, markWad, imQ 
   return need < fullQ ? need : fullQ;
 }
 
+type OrderSums = { bidLots: bigint; bidValueQ: bigint; askLots: bigint; askValueQ: bigint };
+const PAYOFF_Q_PER_LOT = 1000n * 10n ** 18n;
+
+/** Commitments with one more order at `tick` added. */
+export function withOrder(s: OrderSums, lots: bigint, tick: number, isBuy: boolean): OrderSums {
+  const valueQ = lots * BigInt(tick) * 10n ** 18n;
+  return isBuy ? { ...s, bidLots: s.bidLots + lots, bidValueQ: s.bidValueQ + valueQ }
+    : { ...s, askLots: s.askLots + lots, askValueQ: s.askValueQ + valueQ };
+}
+
+/**
+ * Market cash that leaves no deficit at either outcome once every commitment fills: the full-backing
+ * predicate of CoverageMath.deficits with a zero fee cap (DEC-11). Admission remains authoritative.
+ */
+export function backedCashQ(positionLots: bigint, s: OrderSums): bigint {
+  const atNo = s.bidValueQ;
+  const atYes = (s.askLots - positionLots) * PAYOFF_Q_PER_LOT - s.askValueQ;
+  const need = atNo > atYes ? atNo : atYes;
+  return need > 0n ? need : 0n;
+}
+
+/**
+ * Cash to add so a leveraged position can grow on its own side, with no resting orders: `imQ` is the
+ * margin on the position after the order and the spread paid at the limit counts against mark equity
+ * (OrderAdmissionMath.eMinQ against imUpperQ).
+ */
+export function marginTopUpQ({ markEquityQ, lots, tick, isBuy, markWad, imQ }: {
+  markEquityQ: bigint; lots: bigint; tick: number; isBuy: boolean; markWad: bigint; imQ: bigint;
+}): bigint {
+  const entryQ = BigInt(tick) * 10n ** 18n, markQ = markWad * 1000n;
+  const adverseQ = isBuy ? entryQ - markQ : markQ - entryQ;
+  const need = imQ + lots * (adverseQ > 0n ? adverseQ : 0n) - markEquityQ;
+  return need > 0n ? need : 0n;
+}
+
 /** Q to collateral atoms (10^18 Q each), rounded up so a deposit always covers the requirement. */
 export const qToAtomsCeil = (q: bigint) => q <= 0n ? 0n : (q + 10n ** 18n - 1n) / 10n ** 18n;

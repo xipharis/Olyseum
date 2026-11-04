@@ -11,10 +11,10 @@ import { chain } from "@/config/chain";
 import { WalletSessionContext, type WalletSnapshot } from "./wallet-session";
 import { WalletDialog } from "./wallet-dialog";
 
-const instantKey = (address: string) => `eros:instant-off:${address.toLowerCase()}`;
-function readInstantOff(address?: string) {
+const instantKey = (address: string) => `eros:instant-on:${address.toLowerCase()}`;
+function readInstantOn(address?: string) {
   if (!address) return false;
-  try { return localStorage.getItem(instantKey(address)) === "1"; } catch { return false; }
+  try { return localStorage.getItem(instantKey(address)) === "1"; } catch { return false; } // Opt-in: absent means ask.
 }
 
 function message(e: unknown) {
@@ -32,7 +32,7 @@ export function WalletPickerProvider({ children }: { children: ReactNode }) {
   const connection = useConnection();
   const qc = useQueryClient();
   const { sendTransaction } = useSendTransaction();
-  const [instantOff, setInstantOff] = useState<Record<string, boolean>>({});
+  const [instantOn, setInstantOn] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -147,22 +147,23 @@ export function WalletPickerProvider({ children }: { children: ReactNode }) {
 
   const embedded = wallets.some((w) => w.address.toLowerCase() === snapshot.address?.toLowerCase() && ["privy", "privy-v2"].includes(w.walletClientType));
   const selected = snapshot.ready ? snapshot.address : undefined;
-  // On by default for embedded wallets; the choice is remembered per address on this device.
-  const instant = embedded && !!selected && !(instantOff[selected.toLowerCase()] ?? readInstantOff(selected));
+  // Off by default: every transaction asks for approval unless the user turns this on for this address on this device.
+  const instant = embedded && !!selected && (instantOn[selected.toLowerCase()] ?? readInstantOn(selected));
   function setInstant(on: boolean) {
     if (!selected) return;
-    try { if (on) localStorage.removeItem(instantKey(selected)); else localStorage.setItem(instantKey(selected), "1"); } catch { /* Kept for this page session. */ }
-    setInstantOff((all) => ({ ...all, [selected.toLowerCase()]: !on }));
+    try { if (on) localStorage.setItem(instantKey(selected), "1"); else localStorage.removeItem(instantKey(selected)); } catch { /* Kept for this page session. */ }
+    setInstantOn((all) => ({ ...all, [selected.toLowerCase()]: on }));
   }
-  const sendInstant = instant && selected ? async ({ to, data, gas }: { to: Address; data: Hex; gas: bigint }) => {
+  const sendApproved = embedded && selected ? async ({ to, data, gas }: { to: Address; data: Hex; gas: bigint }) => {
     const { hash } = await sendTransaction({ from: selected, to, data, value: 0, chainId: chain.id, gasLimit: gas },
       { address: selected, uiOptions: { showWalletUIs: false } });
     return hash;
   } : undefined;
+  const sendInstant = instant ? sendApproved : undefined;
 
   return (
     <WalletSessionContext.Provider value={{ configured: true, ready, authenticated, busy, embedded,
-      address: selected, error, open, logout, getSnapshot, instant, setInstant, sendInstant }}>
+      address: selected, error, open, logout, getSnapshot, instant, setInstant, sendInstant, sendApproved }}>
       {children}
       <WalletDialog dialogRef={dialog} wallets={wallets} activeAddress={connection.address}
         hasEmbedded={!!getEmbeddedConnectedWallet(wallets) || !!user?.linkedAccounts.some((a) => a.type === "wallet" && a.chainType === "ethereum" && (a.walletClientType === "privy" || a.walletClientType === "privy-v2"))}

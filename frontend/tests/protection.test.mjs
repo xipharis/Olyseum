@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { protectionDecision, validateRule } from '../src/lib/protection.ts';
 import { validateIntent } from '../src/lib/delegated-intent.ts';
-import { closeIntent, expiryBlock } from '../src/lib/trade-intent.ts';
+import { closeIntent, expiryBlock, reduceIntent, reducibleDepth, sharesToLots } from '../src/lib/trade-intent.ts';
 import { canDispute, validEvidence } from '../src/lib/oracle-actions.ts';
 const engine='0x1111111111111111111111111111111111111111';
 const rule={kind:'stop_loss',triggerTick:400,limitTick:380,maxLots:'1000',long:true,expires:2000};
@@ -56,4 +56,24 @@ test('disputes close at exact expiry; evidence respects the contract byte limit'
  assert.equal(validEvidence('https://'+'x'.repeat(249),'0x'+'ab'.repeat(32)),false);
  assert.equal(validEvidence('javascript:alert(1)','0x'+'ab'.repeat(32)),false);
  assert.equal(validEvidence('ipfs://evidence','0x'+'0'.repeat(64)),false);
+});
+
+test('a position can be reduced by any exact amount, and only all of it is a full close', () => {
+  assert.deepEqual({ ...reduceIntent(12345n, 1234n, 400, 600), nonce: 0 }, { nonce: 0, side: 'sell', size: '1.234', price: '0.400', full: false });
+  assert.deepEqual({ ...reduceIntent(-12345n, 1n, 400, 600), nonce: 0 }, { nonce: 0, side: 'buy', size: '0.001', price: '0.600', full: false });
+  assert.equal(reduceIntent(12345n, 12345n, 400, 600).full, true);
+  assert.throws(() => reduceIntent(12345n, 12346n, 400, 600), /larger than the position/);
+  assert.throws(() => reduceIntent(12345n, 0n, 400, 600), /below one lot/);
+});
+test('reducible depth counts only the opposite book inside the slippage bound', () => {
+  const levels = [{ tick: 536, bidLots: 150000n, askLots: 0n }, { tick: 500, bidLots: 900n, askLots: 0n }, { tick: 556, bidLots: 0n, askLots: 70000n }];
+  assert.equal(reducibleDepth(534733n, 536, 556, levels), 150000n);
+  assert.equal(reducibleDepth(-1n, 536, 556, levels), 70000n);
+  assert.equal(reducibleDepth(1n, 0, 556, levels), 0n);
+});
+test('typed share amounts convert to lots exactly', () => {
+  assert.equal(sharesToLots('12.5'), 12500n);
+  assert.equal(sharesToLots(' 0.001 '), 1n);
+  assert.equal(sharesToLots('3'), 3000n);
+  for (const bad of ['', 'abc', '1.2345', '-1', '1e3']) assert.equal(sharesToLots(bad), undefined);
 });

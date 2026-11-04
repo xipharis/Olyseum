@@ -13,7 +13,7 @@ import { fmtDuration, fmtUtc, lotsToClaims, wadToUnit } from "@/lib/units";
 import { PriceAxis } from "./price-axis";
 import { OrderBook, type BookPriceIntent } from "./order-book";
 import { MarketTrades } from "./market-trades";
-import { closeIntent, type CloseIntent } from "@/lib/trade-intent";
+import { reduceIntent, reducibleDepth, type CloseIntent } from "@/lib/trade-intent";
 import { Ticket } from "./ticket";
 import { AccountPanel, DeadlineStrip, MarketInfo, PositionPanel, chipFor } from "./market-parts";
 import { useOwner } from "./wallet";
@@ -129,9 +129,9 @@ export function Terminal({ manifest }: { manifest: MarketManifest }) {
     : !md.active ? "Prices appear when trading opens."
     : "Waiting for fresh market prices.";
 
-  function reduce(bps: number) {
+  function reduce(lots: bigint) {
     if (readUnavailable || !actionMarket || trader?.block !== actionMarket.block || !trader?.account?.preview.positionLots) return;
-    setIntent(closeIntent(trader.account.preview.positionLots, actionMarket.bestBid, actionMarket.bestAsk, bps, ladder.data ?? []));
+    setIntent(reduceIntent(trader.account.preview.positionLots, lots, actionMarket.bestBid, actionMarket.bestAsk, ladder.data ?? []));
     ticketRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "nearest" });
     ticketRef.current?.focus({ preventScroll: true });
   }
@@ -194,7 +194,8 @@ export function Terminal({ manifest }: { manifest: MarketManifest }) {
             </select>
           </div>
           <div className={cx(card, "min-h-40")} role="tabpanel" id={`${tabsId}-panel`} aria-labelledby={primaryIndex < 0 ? `${tabsId}-details` : `${tabsId}-${primaryIndex}`} tabIndex={0}>
-            {tab === "Position" ? <PositionPanel engine={manifest.engine} m={actionMarket} t={trader} onReduce={readUnavailable ? undefined : reduce} />
+            {tab === "Position" ? <PositionPanel engine={manifest.engine} m={actionMarket} t={trader} onReduce={readUnavailable ? undefined : reduce}
+                  fillableLots={ladder.data && actionMarket && trader?.account ? reducibleDepth(trader.account.preview.positionLots, actionMarket.bestBid, actionMarket.bestAsk, ladder.data) : undefined} />
               : tab === "Open orders" || tab === "History" ? (owner.address && !trader
                 ? <p role="status" className="p-5 text-sm text-fg-3">{readUnavailable ? "Account unavailable. Retry to refresh." : "Reading your account…"}</p>
                 : tab === "Open orders" ? <OpenOrders engine={manifest.engine} traderId={trader?.traderId} block={actionMarket?.block} readUnavailable={readUnavailable} />

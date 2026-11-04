@@ -6,7 +6,7 @@ import type { Address } from "viem";
 import { engineAbi } from "@/abi/engine";
 import { client, type MarketSnapshot, type TraderSnapshot } from "@/lib/reads";
 import { usePermissions } from "@/lib/privy-api";
-import { expiryBlock, marketTick, MARKET_SLIPPAGE_TICKS, type CloseIntent } from "@/lib/trade-intent";
+import { expiryBlock, marketFill, MARKET_SLIPPAGE_TICKS, type CloseIntent } from "@/lib/trade-intent";
 import { ownerTrader } from "@/lib/trader";
 import { closeToWalletCalls } from "@/lib/close-to-wallet";
 import { targetLeverageLots } from "@/lib/leverage";
@@ -18,7 +18,7 @@ import { WarmingUp } from "./warming-up";
 import { useWalletSession } from "./wallet-session";
 import { verifiedProfile } from "@/lib/capabilities";
 import { sideMarginAt } from "@/lib/margin-lens";
-import { requiredCollateralQ, qToAtomsCeil } from "@/lib/required-collateral";
+import { backedCashQ, marginTopUpQ, requiredCollateralQ, qToAtomsCeil, withOrder } from "@/lib/required-collateral";
 import { fundingPlan } from "@/lib/funds";
 import { allocationBlocker, validateAllocation } from "@/lib/allocation-guard";
 import { atomsToUsdc } from "@/lib/units";
@@ -95,7 +95,10 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
   // A market order's limit is the depth level that covers the size (the touch until a size is entered).
   let sizeLots = 0n;
   try { sizeLots = parseClaimsToLots(size); } catch { /* Incomplete input. */ }
-  const touchTick = marketTick(sizeLots || 1n, side === "buy", market?.bestBid ?? 0, market?.bestAsk ?? 0, levels ?? []);
+  const fill = marketFill(sizeLots || 1n, side === "buy", market?.bestBid ?? 0, market?.bestAsk ?? 0, levels ?? []);
+  const touchTick = fill.tick;
+  // A market order only asks for (and only adds collateral for) what the book can fill.
+  const orderLots = marketOrder && sizeLots > fill.lots ? fill.lots : sizeLots;
   const price = marketOrder ? (touchTick ? (displayTickForOutcome(tradeIntent.outcome, touchTick) / 1000).toFixed(3) : "") : limitPrice;
   const bestTick = (side === "buy" ? market?.bestAsk : market?.bestBid) ?? 0;
   const [targetLeverage, setTargetLeverage] = useState<number>();
@@ -105,6 +108,10 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
   const positionLots = trader?.account?.preview.positionLots ?? 0n;
   const cashQ = trader?.account?.preview.cashQ ?? 0n;
   const flat = positionLots === 0n;
+  // Selling or closing sets reduce-only and prefills the order. Once flat, clear both: reduce-only would block
+  // leverage, and the leftover size would open the opposite position if submitted again.
+  const flatAccount = !!trader?.account && flat;
+  useEffect(() => { if (flatAccount && reduceOnlyChoice) { setReduceOnly(false); setSize(""); setOrderType("Market"); setInputRevision((n) => n + 1); } }, [flatAccount, reduceOnlyChoice]);
   const markLive = !!market?.risk.markAvailable;
   const sizingEquity = flat ? cashQ : markLive ? trader?.account?.preview.markEquityQ ?? 0n : 0n;
   const reservedOrders = !!trader?.account && (trader.account.preview.orders.bidLots > 0n || trader.account.preview.orders.askLots > 0n);
@@ -123,13 +130,12 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
   const parsed = useMemo((): Parsed => {
     try {
       const tick = canonicalTrade(tradeIntent, parsePriceToTick(price)).tick;
-      const lots = parseClaimsToLots(size);
-      if (lots === 0n) return { ok: false, error: "Enter a size" };
-      return { ok: true, tick, lots };
+      if (parseClaimsToLots(size) === 0n) return { ok: false, error: "Enter a size" };
+      return { ok: true, tick, lots: orderLots };
     } catch (e) {
       return { ok: false, error: price && size ? (e as Error).message : "" };
     }
-  }, [price, size, tradeIntent]);
+  }, [price, size, tradeIntent, orderLots]);
 
   const fieldErrors = { price: "", size: "", expiry: expiryError };
   if (!marketOrder) try { parsePriceToTick(price); } catch { fieldErrors.price = "Enter a price from 0.001 to 0.999 (up to 3 decimals)."; }
@@ -157,10 +163,18 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
   });
   const profile = market ? verifiedProfile(market.profile.profileHash, market.listing.template, market.listing.deploymentCapX) : undefined;
   const markTick = markLive ? Number(market!.risk.markWad / 10n ** 15n) : 0;
+  const heldLots = positionLots < 0n ? -positionLots : positionLots;
+  const restingOrders = trader?.account?.preview.orders;
+  // An order that keeps its account fully backed stays that way; only an already leveraged one tops up to margin.
+  const backedAccount = !restingOrders || backedCashQ(positionLots, restingOrders) <= cashQ;
+  const admitted = preview.data?.rejection === 0 && !!parsed.ok && preview.data.acceptedCapLots >= parsed.lots;
+  const sameSideAdd = !flat && !reducing && !reservedOrders;
+  const topsUpMargin = !fresh && !reduceOnly && !archived && !backedAccount && !admitted && !!preview.data
+    && sameSideAdd && markLive && cap !== undefined && cap > 1n;
   const margin = useQuery({
-    queryKey: ["side-margin", engine, side, dParsed.ok ? dParsed.lots.toString() : "", markTick, market?.block.toString()],
-    enabled: fresh && openLeverage > 1 && markTick > 0 && markTick < 1000 && !!profile && dParsed.ok && !readUnavailable,
-    queryFn: () => sideMarginAt(dParsed.ok ? dParsed.lots : 1n, side === "buy", markTick, market!.risk.secsToT, market!.risk.asOfTime, profile!, market!.block),
+    queryKey: ["side-margin", engine, side, dParsed.ok ? ((fresh ? 0n : heldLots) + dParsed.lots).toString() : "", markTick, market?.block.toString()],
+    enabled: (topsUpMargin || (fresh && openLeverage > 1)) && markTick > 0 && markTick < 1000 && !!profile && dParsed.ok && !readUnavailable,
+    queryFn: () => sideMarginAt((fresh ? 0n : heldLots) + (dParsed.ok ? dParsed.lots : 1n), side === "buy", markTick, market!.risk.secsToT, market!.risk.asOfTime, profile!, market!.block),
     staleTime: 3500, retry: false,
   });
   // Collateral this order needs in the market. Leveraged requirements carry a 1% margin for time and rounding.
@@ -173,20 +187,27 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
     }
   } catch { /* Incomplete input. */ }
   const marketCashAtoms = cashQ > 0n ? cashQ / 10n ** 18n : 0n;
-  // Funding short of an existing position's margin is read from the contract preview instead.
-  const previewShortfall = !fresh && preview.data?.rejection === 8 && preview.data.requiredImQ > preview.data.eMinQ
-    ? qToAtomsCeil(preview.data.requiredImQ - preview.data.eMinQ) * 101n / 100n + 1n : 0n;
-  const shortfall = fresh ? (requiredAtoms !== undefined && requiredAtoms > marketCashAtoms ? requiredAtoms - marketCashAtoms : 0n) : previewShortfall;
+  // Collateral this order adds from the wallet. previewOrder reports no margin figures for a size it
+  // cannot admit, so the amount is worked out here; the preview still decides admission once it is added.
+  const backedOrderCashQ = restingOrders && parsed.ok ? backedCashQ(positionLots, withOrder(restingOrders, parsed.lots, parsed.tick, side === "buy")) : 0n;
+  const backedTopUp = backedOrderCashQ > cashQ ? qToAtomsCeil(backedOrderCashQ - cashQ) : 0n;
+  let marginTopUp: bigint | undefined;
+  if (topsUpMargin && parsed.ok && margin.data) {
+    const need = qToAtomsCeil(marginTopUpQ({ markEquityQ: trader!.account!.preview.markEquityQ, lots: parsed.lots, tick: parsed.tick, isBuy: side === "buy", markWad: market!.risk.markWad, imQ: margin.data.imQ }));
+    const buffered = need + (need + 99n) / 100n;
+    marginTopUp = !margin.data.fullBacking && buffered < backedTopUp ? buffered : backedTopUp;
+  }
+  // A leverage target above 1× is sized from the equity already in this market, so it adds nothing.
+  const usesBacking = !fresh && !reduceOnly && !archived && (backedAccount ? !(targetLeverage && targetLeverage > 1) : !admitted && !topsUpMargin && !!preview.data);
+  const shortfall = fresh ? (requiredAtoms !== undefined && requiredAtoms > marketCashAtoms ? requiredAtoms - marketCashAtoms : 0n)
+    : topsUpMargin ? marginTopUp ?? 0n : usesBacking ? backedTopUp : 0n;
   const fundable = !!trader && trader.wallet + trader.free >= shortfall;
   const fundingBlocked = shortfall > 0n && market ? allocationBlocker(market) : undefined;
   const symbol = trader?.assets.symbol ?? "tUSDC";
   const session = useWalletSession();
-  // The funding steps this order adds, and the user's acknowledgement of exactly this amount.
-  let fundingSteps: ReturnType<typeof fundingPlan> | undefined;
-  try { if (shortfall > 0n && trader) fundingSteps = fundingPlan(shortfall, trader.free, trader.wallet, trader.allowance); } catch { /* Shown as a wallet shortfall. */ }
-  const [ack, setAck] = useState<string>();
-  const ackKey = `${engine}:${shortfall}:${sizeLots}:${openLeverage}`;
-  const acknowledged = ack === ackKey;
+  // Added collateral answers these rejections; 9 and 10 only clear when it removes the deficit altogether.
+  const fullyBacks = fresh ? openLeverage === 1 : usesBacking;
+  const fundingClears = preview.data?.rejection === 0 || preview.data?.rejection === 8 || (fullyBacks && (preview.data?.rejection === 9 || preview.data?.rejection === 10));
   const maximum = useMaxOrder({ engine, owner: owner.address, market, trader, tick: priceTick,
     isBuy: side === "buy", reduceOnly, unavailable: readUnavailable, inputRevision });
 
@@ -197,6 +218,7 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
     }
     setTradeIntent(next);
     setTargetLeverage(undefined);
+    setReduceOnly(false); // Picking a side starts a normal order; selling is prepared from the Position tab.
   }
 
   // The state that keeps the order from being sent, in the order the user meets it. Disabled
@@ -216,12 +238,11 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
               : !parsed.ok
                 ? parsed.error || "Enter price and size"
                 : expiryError ? expiryError
-                : fresh && requiredAtoms === undefined ? (margin.isError ? "Margin estimate unavailable" : "Checking collateral…")
+                : (fresh && requiredAtoms === undefined) || (topsUpMargin && marginTopUp === undefined) ? (margin.isError ? "Margin estimate unavailable" : "Checking collateral…")
                 : shortfall > 0n && trader && !fundable ? `Needs ${atomsToUsdc(shortfall)} ${symbol} · wallet has ${atomsToUsdc(trader.wallet + trader.free)}`
                 : fundingBlocked ? fundingBlocked
-                : shortfall > 0n && !acknowledged ? "Confirm the collateral above"
                 // An unfunded account has no preview; funding happens first and the order re-checks admission.
-                : shortfall > 0n && (traderId === 0 || preview.data?.rejection === 8) ? null
+                : shortfall > 0n && (traderId === 0 || fundingClears) ? null
                 : traderId === 0 ? "Enter a size to fund this market"
                 : preview.isError ? "Order preview unavailable"
                 : !preview.data || !dParsed.ok || parsed.tick !== dParsed.tick || parsed.lots !== dParsed.lots ? "Checking order…"
@@ -250,10 +271,16 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
   const warming = !archived && (!market || readUnavailable || preview.isError || margin.isError || (owner.connected && !trader)
     || (!market.halted && (!market.active || market.risk.accountingState !== 0 || !market.risk.indexAvailable)));
 
+  const [closeNote, setCloseNote] = useState<string>();
+  // Embedded wallets: one in-app approval covers funding and the order. Any edit needs a fresh approval.
+  const [confirming, setConfirming] = useState(false);
+  useEffect(() => { setConfirming(false); }, [size, price, side, orderType, openLeverage, reduceOnly, shortfall]);
   const closing = !!intent?.full && reduceOnly && size === intent.size && price === intent.price && side === intent.side;
 
-  async function submit() {
+  async function submit(approvedOnce = false) {
+    setConfirming(false);
     if (!owner.address || !market || !parsed.ok || blocker || owner.wrongChain) return;
+    setCloseNote(undefined);
     const sdk = ownerTrader(engine, owner.address);
     const funding: Parameters<typeof tx.run>[1] = [];
     if (shortfall > 0n && trader) {
@@ -280,10 +307,15 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
       ],
       summarizeOrder,
       oneClick && delegated && !funding.length ? { previewBlock: market.block } : undefined,
+      false,
+      approvedOnce,
     );
     if (!filled || !closing) return;
     let sweep: Awaited<ReturnType<typeof closeToWalletCalls>>;
-    try { sweep = await closeToWalletCalls(engine, owner.address); } catch { return; } // Funds stay releasable in Manage collateral.
+    try { sweep = await closeToWalletCalls(engine, owner.address); }
+    catch { setCloseNote("Your order went through, but returning funds could not start. They stay available in Manage collateral."); return; }
+    // A thin book fills only part of a close: say so, because margin stays locked until the position is flat.
+    if (sweep.open) setCloseNote("The book could not fill the whole position, so part of it is still open and your funds stay in this market. Press Close position again when new orders appear.");
     if (sweep.calls.length) await tx.run(owner.address, sweep.calls,
       () => ({ summary: "Position closed. Funds returned to your wallet.", tone: "neutral" }));
   }
@@ -408,6 +440,7 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
           {validation.message("size") ? <FieldError id={validation.errorId("size")}>{validation.message("size")}</FieldError>
             : <span className="text-xs text-fg-3">Each YES share pays 1 if the answer is YES; NO pays if it is not.</span>}
         </label>
+        {marketOrder && orderLots < sizeLots && <p role="status" className="text-xs leading-relaxed text-signal-text">The book only has {lotsToClaims(orderLots)} shares within {(MARKET_SLIPPAGE_TICKS / 1000).toFixed(3)} of the best price, so this order buys {lotsToClaims(orderLots)}. Use a Limit order to wait for the rest.</p>}
         {clampNote ? <p role="status" className="text-xs leading-relaxed text-signal-text">{clampNote}</p>
           : maximum.message && <p role="status" className="text-xs leading-relaxed text-fg-3">{maximum.message}</p>}
         {maximum.error && <p role="alert" className="text-xs leading-relaxed text-ask">{maximum.error}</p>}
@@ -428,13 +461,17 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
               className={cx("ui-toggle h-8 border text-xs tnum disabled:cursor-not-allowed", targetLeverage === x ? "border-signal bg-signal/10 text-signal-text" : "border-line-strong bg-panel text-fg-2 hover:bg-press")}
               onClick={() => { const lots = leverageSizes[x - 1]; if (!lots) { setTargetLeverage(undefined); return; } setSize(lotsToClaims(lots)); setTargetLeverage(x); setInputRevision((n) => n + 1); }}>{x}×</button>)}
           </div>
-          {fresh && <div className="flex items-baseline justify-between gap-3 rounded-md bg-panel px-3 py-2.5" aria-live="polite">
+          {fresh ? <div className="flex items-baseline justify-between gap-3 rounded-md bg-panel px-3 py-2.5" aria-live="polite">
             <span className="label text-fg-3">Collateral needed</span>
             <span className="text-right text-sm tnum text-fg">{requiredAtoms === undefined ? (parsed.ok ? (margin.isError ? "Unavailable" : "Calculating…") : "Enter a size")
               : <>{atomsToUsdc(requiredAtoms)} {symbol}{!owner.connected
                 ? <span className="block text-xs text-fg-3">Comes from your wallet when you trade</span>
                 : shortfall > 0n && <span className="block text-xs text-fg-3">{marketCashAtoms > 0n ? `${atomsToUsdc(marketCashAtoms)} already in this market · ` : ""}{atomsToUsdc(shortfall)} from your wallet</span>}</>}</span>
+          </div> : shortfall > 0n && <div className="flex items-baseline justify-between gap-3 rounded-md bg-panel px-3 py-2.5" aria-live="polite">
+            <span className="label text-fg-3">Collateral added</span>
+            <span className="text-right text-sm tnum text-fg">{atomsToUsdc(shortfall)} {symbol}<span className="block text-xs text-fg-3">From your wallet when you trade</span></span>
           </div>}
+          {owner.connected && shortfall > 0n && !session.instant && <p className="text-xs leading-relaxed text-fg-3">Your wallet asks you to confirm each step.</p>}
           <details className="text-xs text-fg-3">
             <summary className="cursor-pointer py-1 hover:text-fg">Trading details</summary>
             <div className="grid gap-2 pb-1 pt-2 leading-relaxed">
@@ -452,26 +489,6 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
         <OrderSummary engine={engine} owner={owner.address} market={market} trader={trader} tradeIntent={tradeIntent}
           order={parsed.ok ? { tick: parsed.tick, lots: parsed.lots, isBuy: side === "buy", reduceOnly } : undefined}
           feeCapQ={preview.data?.rejection === 0 ? preview.data.feeCapQ : undefined} admittedLots={preview.data?.acceptedCapLots} unavailable={readUnavailable} />
-        {owner.connected && fundingSteps && parsed.ok && <div className="rounded-md p-3 text-xs shadow-[inset_0_0_0_1px_var(--color-signal)]" aria-label="Collateral included in this trade">
-          <p className="label text-signal-text">This trade includes collateral</p>
-          <ol className="mt-2 grid gap-1.5 text-fg-2">
-            {[
-              fundingSteps.approve > 0n && `Allow the Olyseum vault to use ${atomsToUsdc(fundingSteps.approve)} ${symbol}`,
-              fundingSteps.deposit > 0n && `Deposit ${atomsToUsdc(fundingSteps.deposit)} ${symbol} from your wallet into the vault`,
-              `Move ${atomsToUsdc(fundingSteps.allocate)} ${symbol} into this market as collateral${fundingSteps.deposit < fundingSteps.allocate ? ` (${atomsToUsdc(fundingSteps.allocate - fundingSteps.deposit)} already in your vault)` : ""}`,
-              `Place the order: ${intentLabel(tradeIntent)} · ${lotsToClaims(parsed.lots)} shares · ${orderType}${marketOrder ? ` ${side === "buy" ? "at most" : "at least"}` : " at"} YES ${price}`,
-            ].filter(Boolean).map((step, i) => <li key={i} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-1.5"><span className="tnum text-fg-3">{i + 1}.</span><span>{step}</span></li>)}
-          </ol>
-          <p className="mt-2 leading-relaxed text-fg-3">{session.instant ? "These are signed instantly, without pop-ups." : "Your wallet asks you to confirm each step."} The collateral stays in this market until you release it from Balances.</p>
-          <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm text-fg">
-            <span className="relative mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
-              <input type="checkbox" checked={acknowledged} onChange={(e) => setAck(e.target.checked ? ackKey : undefined)}
-                className="peer absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none rounded-sm border border-line-strong bg-ground checked:border-signal checked:bg-signal" />
-              <Check size={12} strokeWidth={3} className="pointer-events-none relative hidden text-on-signal peer-checked:block" aria-hidden />
-            </span>
-            I understand {atomsToUsdc(shortfall)} {symbol} from my wallet becomes collateral for this trade.
-          </label>
-        </div>}
         {preview.data && <details className="text-xs text-fg-3">
           <summary className="cursor-pointer py-1 hover:text-fg">Margin and reserve</summary>
           {preview.data && <dl className="mt-2"><Row k="Required initial margin" v={preview.data.fullBackingRequired ? "Fully backed" : qToMoney(preview.data.requiredImQ).usdc} /><Row k="Equity after reservations" v={preview.data.id.markAvailable ? qToMoney(preview.data.eMinQ).usdc : "No mark"} /><Row k="Deficit if NO / YES" v={`${qToMoney(preview.data.d0AfterQ).usdc} / ${qToMoney(preview.data.d1AfterQ).usdc}`} /><Row k="Reserve coverage" v={preview.data.marketCoverageAfter ? "Covered" : "Unavailable"} /></dl>}
@@ -495,10 +512,20 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
             Switch to Monad testnet
           </Button>
         ) : (
-          <Button variant={side === "buy" ? "bid" : "ask"} size="lg" arrow disabled={!!blocker || tx.state.status === "pending" || tx.state.status === "sent"} onClick={submit}>
+          <Button variant={side === "buy" ? "bid" : "ask"} size="lg" arrow disabled={!!blocker || confirming || tx.state.status === "pending" || tx.state.status === "sent"} onClick={() => { if (session.embedded && !session.instant) setConfirming(true); else void submit(); }}>
             {blocker ?? (tx.state.status === "pending" || tx.state.status === "sent" ? tx.state.step : closing ? "Close position" : shortfall > 0n ? `${intentLabel(tradeIntent)} · add ${atomsToUsdc(shortfall)} ${symbol}` : intentLabel(tradeIntent))}
           </Button>
         )}
+        {confirming && !blocker && parsed.ok && <div role="dialog" aria-label="Approve this trade" className="grid gap-2 rounded-md p-3 text-xs shadow-[inset_0_0_0_1px_var(--color-signal)]">
+          <p className="label text-signal-text">Approve this trade</p>
+          <p className="text-sm text-fg">{side === "buy" ? "Buy" : "Sell"} {lotsToClaims(parsed.lots)} YES at {side === "buy" ? "up to" : "at least"} {(parsed.tick / 1000).toFixed(3)}{fresh && openLeverage > 1 ? ` · ${openLeverage}×` : ""}</p>
+          {shortfall > 0n && <p className="text-sm text-fg">You pay <strong>{atomsToUsdc(shortfall)} {symbol}</strong> from your wallet as collateral.</p>}
+          <p className="leading-relaxed text-fg-3">This one approval signs {shortfall > 0n ? "the funding steps and the order" : "the order"} on Monad testnet. Gas is paid in test MON.</p>
+          <div className="flex gap-2">
+            <Button variant={side === "buy" ? "bid" : "ask"} size="sm" onClick={() => void submit(true)}>Approve and trade</Button>
+            <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
+          </div>
+        </div>}
         {closing && owner.address && !owner.wrongChain && <p className="text-xs leading-relaxed text-fg-3">
           When the close fills completely, your remaining collateral is returned to your wallet (two more confirmations). A partial fill keeps the rest of the position open.
         </p>}
@@ -507,6 +534,7 @@ export function Ticket({ engine, market, trader, intent, bookPrice, levels, read
         {owner.wrongChain && chainError && <p role="alert" className="text-xs text-ask">Network switch was not completed. Unlock your wallet and try again.</p>}
         {preview.data && preview.data.rejection !== 0 && parsed.ok && <p role="status" className="text-xs leading-relaxed text-ask">{REJECT[preview.data.rejection] || "This order cannot be admitted. Review your price, size, and collateral."}</p>}
         <TxFeedback state={tx.state} />
+        {closeNote && <p role="status" className="text-xs text-signal-text">{closeNote}</p>}
         {!market?.active && market && (
           <p className="text-xs leading-relaxed text-fg-3">
             Orders open once governance activates this market and the signed index feed is running.

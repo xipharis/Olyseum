@@ -1344,3 +1344,35 @@ failure or new A-I01 regression was found; lifecycle-policy changes require sepa
 - Tests (exit 0): `frontend`: `npm run typecheck`; `npm test` 165/165. Both ran on a working tree
   that also held uncommitted ticket and collateral work, which this commit does not include.
 - Not run: e2e suites, `next build`, gates, contract tests. No contract source changed.
+
+### 2026-11-04 (TICKET-COLLATERAL) — Ticket adds collateral on every trade — uncommitted, not browser-tested
+
+- Reported: a market buy of 285 claims at 1× on the 5× NBA perp filled 150. Cause: the keeper quotes
+  `LOTS=150000` per level (`scripts/native-market/keeper-daemon.sh`) and the IOC drops whatever is not
+  within 20 ticks of the touch. Read on-chain on 2026-11-04: one ask, 150,000 lots at tick 556. The
+  ticket had also funded the full 285, leaving the difference idle in the market.
+- Ticket: market orders are sized to reachable depth with a visible note (`marketFill`); the
+  acknowledgement checkbox and step list are gone; open positions now fund too. `previewOrder` returns
+  no margin figures when `capLots == 0`, so the old `previewShortfall` could never be non-zero. New
+  `backedCashQ` (mirrors `CoverageMath.deficits`) and `marginTopUpQ`. A fully backed account stays fully
+  backed; only an already leveraged one tops up to margin + 1%; a target above 1× adds nothing.
+- Tests: `npm run typecheck` exit 0; `npm test` exit 0. Local anvil fork of `0x0ff5…45C0`, nothing
+  broadcast: old flow funded 164.16 and left 150.82 idle on a 23.998-claim ask; new flow funded 13.34 and
+  left 0; adding 100 claims to a backed position went from cap 50,000 to cap 100,000 with d0 = d1 = 0.
+- Not verified: the wallet flow in a browser, and the leveraged `marginTopUpQ` path on a fork.
+- Open: the Max button still only counts collateral already in the market. Not committed: another session
+  has uncommitted edits in `ticket.tsx` and `trade-intent.ts`.
+
+### 2026-11-04 (KEEPER-QUOTES) — Keeper refill and quote size setting — pushed, not running live
+
+- Keeper re-quotes when a quote falls under half of `LOTS` (`quotes_thin`), and `KEEPER_LOTS` in `ops.env`
+  sets the size. The default stays 150,000 lots, so live quotes do not grow until that is set and the
+  worker restarts. Render's CLI token has expired and the keeper keys are not on this machine.
+- Local fork of `0x0ff5…45C0`, nothing broadcast: the maker rested quotes of 1,000 and 2,000 claims. A
+  taker lifting the whole ask reverted with `OpenInterestCapExceeded`, as open interest was 660.735 of a
+  1,000-claim cap fixed at listing. A large fill inside the cap has not been shown.
+- Tests: `npm run typecheck` exit 0; `npm test` 165/165; `quotes.test.mjs` plus `market-kinds.test.mjs`
+  8/8. `npm ci` in `packages/pricefeed` restored `viem` 2.57.2 from the lockfile. No test covers
+  `KEEPER_LOTS` itself, and the refill has not run in a live keeper loop.
+- Open: the ticket does not limit orders to the remaining cap. An order above it passes the preview, then
+  reverts after its collateral has moved. Another session is deploying a new market; check it for fills.

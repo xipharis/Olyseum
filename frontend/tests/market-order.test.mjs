@@ -33,3 +33,21 @@ test('without depth a market order uses the touch, and an empty side has no pric
   assert.equal(marketTick(5000n, true, 500, 990, [{ tick: 990, bidLots: 0n, askLots: 1000n }]), 999);
   assert.equal(marketTick(5000n, false, 10, 990, [{ tick: 10, bidLots: 1000n, askLots: 0n }]), 1);
 });
+
+test('a market buy larger than the reachable book is sized to that book', async () => {
+  const { marketFill } = await import('../src/lib/trade-intent.ts');
+  // The 5x perp on 2026-11-04: one 150-claim ask at 0.556 and nothing else up to 0.576.
+  const levels = [{ tick: 556, bidLots: 0n, askLots: 150000n }];
+  assert.deepEqual(marketFill(285000n, true, 536, 556, levels), { tick: 556, lots: 150000n });
+  // Two levels: the limit stops at the level that covers the size, and a smaller size is untouched.
+  const two = [{ tick: 526, bidLots: 0n, askLots: 150000n }, { tick: 530, bidLots: 0n, askLots: 150000n }];
+  assert.deepEqual(marketFill(285000n, true, 518, 526, two), { tick: 530, lots: 285000n });
+  assert.deepEqual(marketFill(100000n, true, 518, 526, two), { tick: 526, lots: 100000n });
+  // Depth beyond the 20-tick bound is not reachable.
+  assert.deepEqual(marketFill(285000n, true, 518, 526, [two[0], { tick: 547, bidLots: 0n, askLots: 150000n }]), { tick: 526, lots: 150000n });
+  // Sells walk bids downward.
+  assert.deepEqual(marketFill(285000n, false, 536, 556, [{ tick: 536, bidLots: 150000n, askLots: 0n }]), { tick: 536, lots: 150000n });
+  // No depth read, or nothing in range: keep the size and let the contract decide.
+  assert.deepEqual(marketFill(285000n, true, 536, 556, []), { tick: 556, lots: 285000n });
+  assert.deepEqual(marketFill(285000n, true, 536, 556, [{ tick: 700, bidLots: 0n, askLots: 1n }]), { tick: 556, lots: 285000n });
+});
